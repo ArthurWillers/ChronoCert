@@ -1,0 +1,4 @@
+/vendor/
+
+/private/config/.env
+/private/uploads/
