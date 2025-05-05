@@ -1,0 +1,44 @@
+:root {
+  --bs-primary: #5F21AF;
+}
+
+/* Botões primary */
+.btn-primary {
+  background-color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #4a198a !important;
+  border-color: #4a198a !important;
+}
+
+/* Botões outline primary */
+.btn-outline-primary {
+  color: var(--bs-primary) !important;
+  border-color: var(--bs-primary) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--bs-primary) !important;
+  color: #fff !important;
+  border-color: var(--bs-primary) !important;
+}
+
+/* Fundo primary */
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+
+/* Texto primary */
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+
+/* Bordas primary */
+.border-primary {
+  border-color: var(--bs-primary) !important;
+}
