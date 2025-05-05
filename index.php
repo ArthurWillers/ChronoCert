@@ -23,6 +23,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
 <body>
 
+  <?php render_toast() ?>
 
   <div class="container-fluid min-vh-100 text-center text-white bg-primary d-flex flex-column justify-content-center align-items-center">
     <img src="./assets/img/ChronoCert_logo.png" alt="ChronoCert Logo" width="120" class="mb-3" />
