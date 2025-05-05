@@ -28,11 +28,11 @@ SET time_zone = "+00:00";
 --
 
 CREATE TABLE `certificado` (
-  `nome_do_arquivo` char(32) NOT NULL,
-  `nome_pessoal` varchar(100) DEFAULT NULL,
-  `carga_horaria` float DEFAULT NULL,
-  `categoria` set('Bolsa_Projetos_de_Ensino_e_Extensoes','Ouvinte_em_Eventos_relacionados_ao_Curso','Organizador_em_Eventos_relacionados_ao_Curso','Voluntario_em_Areas_do_Curso','Estagio_Nao_Obrigatorio','Publicacao_Apresentacao_e_Premiacao_de_Trabalhos','Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso','Curso_de_Formacao_na_Area_Especifica','Ouvinte_em_apresentacao_de_trabalhos','Curso_de_Linguas','Monitor_em_Areas_do_Curso','Participacoes_Artisticas_e_Institucionais','Atividades_Colegiais_Representativas') DEFAULT NULL,
-  `fk_usuario_email` varchar(256) DEFAULT NULL
+  `nome_do_arquivo` varchar(255) NOT NULL,
+  `nome_pessoal` varchar(255) NOT NULL,
+  `carga_horaria` float NOT NULL,
+  `categoria` set('Bolsa_Projetos_de_Ensino_e_Extensoes','Ouvinte_em_Eventos_relacionados_ao_Curso','Organizador_em_Eventos_relacionados_ao_Curso','Voluntario_em_Areas_do_Curso','Estagio_Nao_Obrigatorio','Publicacao_Apresentacao_e_Premiacao_de_Trabalhos','Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso','Curso_de_Formacao_na_Area_Especifica','Ouvinte_em_apresentacao_de_trabalhos','Curso_de_Linguas','Monitor_em_Areas_do_Curso','Participacoes_Artisticas_e_Institucionais','Atividades_Colegiais_Representativas') NOT NULL,
+  `fk_usuario_email` varchar(256) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -43,8 +43,8 @@ CREATE TABLE `certificado` (
 
 CREATE TABLE `codigo_de_verificacao` (
   `codigo` char(8) NOT NULL,
-  `hora_da_criacao` timestamp NULL DEFAULT NULL,
-  `fk_usuario_email` varchar(256) DEFAULT NULL
+  `hora_da_criacao` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `fk_usuario_email` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -54,10 +54,9 @@ CREATE TABLE `codigo_de_verificacao` (
 --
 
 CREATE TABLE `usuario` (
-  `email` varchar(256) NOT NULL,
-  `nome_de_usuario` varchar(100) DEFAULT NULL,
-  `senha` char(128) DEFAULT NULL,
-  `curso` set('informatica','administracao','agropecuaria','alimentos') DEFAULT NULL
+  `email` varchar(255) NOT NULL,
+  `nome_de_usuario` varchar(255) NOT NULL,
+  `senha` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
