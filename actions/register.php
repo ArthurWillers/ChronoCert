@@ -3,12 +3,6 @@ require_once '../includes/session_start.php';
 require_once '../includes/toast.php';
 require_once '../private/config/db_connection.php';
 
-function redirect_with_toast($location, $message, $type = 'danger') {
-    set_toast($message, $type);
-    header("Location: $location");
-    exit();
-}
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
 
     $username_register = $_POST['username_register'] ?? '';

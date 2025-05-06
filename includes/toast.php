@@ -19,4 +19,10 @@ function render_toast() {
         unset($_SESSION['message_type']);
     }
 }
+
+function redirect_with_toast($location, $message, $type = 'danger') {
+    set_toast($message, $type);
+    header("Location: $location");
+    exit();
+}
 ?>
