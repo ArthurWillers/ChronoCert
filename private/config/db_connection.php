@@ -22,7 +22,7 @@ class db_connection {
 
     public function close_connection() {
         if ($this->conn) {
-            $this->conn->close_connection();
+            $this->conn->close();
         }
     }
 }

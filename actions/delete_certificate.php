@@ -60,5 +60,5 @@ try {
 } catch (Exception $e) {
   redirect_with_toast($redirect_url, "Erro ao excluir o certificado: " . $e->getMessage());
 } finally {
-  $conn->close_connection();
+  $db->close_connection();
 }

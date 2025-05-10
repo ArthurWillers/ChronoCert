@@ -30,7 +30,7 @@ if (!$result || $result->num_rows == 0) {
 
 $file = $result->fetch_assoc();
 $file_path = $upload_dir . $file['nome_do_arquivo'];
-$conn->close_connection();
+$db->close_connection();
 
 if (!file_exists($file_path)) {
   $db->close_connection();

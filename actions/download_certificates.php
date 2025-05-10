@@ -51,7 +51,7 @@ while ($file = $result->fetch_assoc()) {
         $has_files = true;
     }
 }
-$zip->close_connection();
+$zip->close();
 $result->free();
 $db->close_connection();
 
