@@ -13,16 +13,16 @@ composer install
 Certifique-se de conceder permissões de leitura, gravação e execução (por exemplo, 775) às pastas que fazem upload ou movimentação de arquivos e arquivos temporários:
 
 ```bash
-sudo chown -R apache:apache /var/www/html/ChronoCert/private/uploads
+sudo chown -R www-data:www-data /var/www/html/ChronoCert/private/uploads
 sudo chmod -R 775 /var/www/html/ChronoCert/private/uploads
 
-sudo chown -R apache:apache /var/www/html/ChronoCert/private/tmp
+sudo chown -R www-data:www-data /var/www/html/ChronoCert/private/tmp
 sudo chmod -R 775 /var/www/html/ChronoCert/private/tmp
 ```
 
 ### Configure o SELinux (se aplicável)
 
-Se o SELinux estiver habilitado, ajuste o contexto das pastas:
+Se o SELinux estiver habilitado (não é comum no Ubuntu, mas pode ser usado em algumas configurações), ajuste o contexto das pastas:
 
 ```bash
 sudo chcon -R -t httpd_sys_rw_content_t /var/www/html/ChronoCert/private/uploads
