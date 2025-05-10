@@ -302,7 +302,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
         }
         
         
-        // Check file field
+
         if (!fileInput.files || fileInput.files.length === 0) {
           isValid = false;
         } else {
@@ -329,7 +329,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       categoria.addEventListener("change", validateForm);
       fileInput.addEventListener("change", validateForm);
       
-      // Initial validation
+
       validateForm();
     });
   </script>

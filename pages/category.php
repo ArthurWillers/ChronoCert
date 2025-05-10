@@ -105,7 +105,7 @@ $user_email = $_SESSION['user_email'];
   <div class="container-fluid pb-5">
 
     <?php
-    // Calculate total hours for this category
+
     $db = new db_connection();
     $conn = $db->open();
 
@@ -119,18 +119,18 @@ $user_email = $_SESSION['user_email'];
       $row = $result->fetch_assoc();
       $total_hours = (float)($row['total'] ?? 0);
 
-      // Cap at limit
+
       if ($total_hours > $category_limit) {
         $total_hours = $category_limit;
       }
 
-      // Calculate percentage
+
       $percentage = ($category_limit > 0) ? floor(($total_hours / $category_limit) * 100) : 0;
       if ($percentage > 100) {
         $percentage = 100;
       }
 
-      // Determine progress bar color
+
       $progress_color = "bg-primary";
       if ($percentage >= 100) {
         $progress_color = "bg-success";
@@ -142,7 +142,7 @@ $user_email = $_SESSION['user_email'];
         $progress_color = "bg-danger";
       }
 
-      // Display the category progress card
+
       echo "
       <div class='row my-4'>
         <div class='col-12'>
@@ -172,7 +172,7 @@ $user_email = $_SESSION['user_email'];
       $db = new db_connection();
       $conn = $db->open();
 
-      // Fetch certificates for this category
+
       $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria 
               FROM certificado 
               WHERE fk_usuario_email = ? 
@@ -323,7 +323,7 @@ $user_email = $_SESSION['user_email'];
         }
 
 
-        // Check file field
+
         if (!fileInput.files || fileInput.files.length === 0) {
           isValid = false;
         } else {

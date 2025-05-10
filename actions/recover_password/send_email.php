@@ -15,22 +15,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_recover_passwor
     exit();
 }
 
-// Validar o e-mail
+
 if (empty($email)) {
     redirect_with_toast('../../pages/recover_password/enter_email.php', 'O campo de E-mail deve ser preenchido', 'danger');
     exit();
 }
 
-// Abrir a conexão com o banco de dados
+
 require_once '../../private/config/db_connection.php';
 $db = new db_connection();
 $conn = $db->open();
 
-// Verificar se o e-mail existe na tabela de usuários
+
 $sql = "SELECT * FROM usuario WHERE email = ?";
 $result = $conn->execute_query($sql, [$email]);
 if ($result && $result->num_rows > 0) {
-    // Gerar um token único de 8 caracteres
+
     $chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     do {
         $verification_code = '';
@@ -43,17 +43,17 @@ if ($result && $result->num_rows > 0) {
         if ($check) $check->free();
     } while ($has_duplicate);
 
-    // Excluir o código anterior, se existir
+
     $sql = "DELETE FROM codigo_de_verificacao WHERE fk_usuario_email = ?";
     $conn->execute_query($sql, [$email]);
 
-    // Inserir o novo código na tabela de códigos de verificação
+
     $sql = "INSERT INTO codigo_de_verificacao (codigo, fk_usuario_email) VALUES (?, ?)";
     $conn->execute_query($sql, [$verification_code, $email]);
 
     $db->close();
 
-    // Enviar o e-mail
+
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../private/config');
     $dotenv->load();
 
