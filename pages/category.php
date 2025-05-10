@@ -350,9 +350,24 @@ $user_email = $_SESSION['user_email'];
       categoria.addEventListener("change", validateForm);
       fileInput.addEventListener("change", validateForm);
 
-      // Initial validation
       validateForm();
     });
+
+    const deleteModal = document.getElementById('deleteModal');
+    if (deleteModal) {
+      deleteModal.addEventListener('show.bs.modal', function(event) {
+        const button = event.relatedTarget;
+
+        const fileName = button.getAttribute('data-file');
+        const certName = button.getAttribute('data-name');
+
+        const modalCertName = deleteModal.querySelector('#cert-name');
+        const fileInput = deleteModal.querySelector('#file-to-delete');
+        
+        if (modalCertName) modalCertName.textContent = certName;
+        if (fileInput) fileInput.value = fileName;
+      });
+    }
   </script>
 </body>
 
