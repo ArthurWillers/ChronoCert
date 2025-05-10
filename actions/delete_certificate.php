@@ -41,7 +41,7 @@ try {
 
   if ($conn->affected_rows > 0) {
     // Also delete the actual file from filesystem
-    $file_path = "../uploads/certificates/{$user_email}/{$file_name}";
+    $file_path = "../private/uploads/{$file_name}";
 
     if (file_exists($file_path)) {
       if (unlink($file_path)) {
