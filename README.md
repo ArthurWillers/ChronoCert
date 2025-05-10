@@ -8,11 +8,14 @@ Antes de iniciar o projeto, instale as dependências executando o comando abaixo
 composer install
 ```
 
-## 2. Configure as permissões das pastas de uploads e temporárias
+## 2. Crie as pastas necessárias e configure as permissões
 
-Certifique-se de conceder permissões de leitura, gravação e execução (por exemplo, 775) às pastas que fazem upload ou movimentação de arquivos e arquivos temporários:
+Certifique-se de criar as pastas de uploads e temporárias, caso elas não existam, e conceda permissões de leitura, gravação e execução (por exemplo, 775):
 
 ```bash
+mkdir -p /var/www/html/ChronoCert/private/uploads
+mkdir -p /var/www/html/ChronoCert/private/tmp
+
 sudo chown -R www-data:www-data /var/www/html/ChronoCert/private/uploads
 sudo chmod -R 775 /var/www/html/ChronoCert/private/uploads
 
