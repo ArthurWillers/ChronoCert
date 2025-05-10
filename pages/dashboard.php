@@ -66,7 +66,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
     <?php 
 
-    $categoriasLimite = [
+    $categories_limit = [
       'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
       'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
       'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
@@ -82,7 +82,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       'Atividades_Colegiais_Representativas' => 20
     ];
     
-    $nomesCategorias = [
+    $categories = [
       'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
       'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
       'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
@@ -98,49 +98,49 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
     ];
 
-    $emailUsuario = $_SESSION['user_email'];
+    $user_email = $_SESSION['user_email'];
 
     $db = new db_connection();
     $conn = $db->open();
     
-    $categoriasSoma = [];
-    foreach ($categoriasLimite as $cat => $limite) {
+    $categories_sum = [];
+    foreach ($categories_limit as $cat => $limit) {
         try {
             $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
                     WHERE fk_usuario_email = ? 
                     AND FIND_IN_SET(?, categoria) > 0";
             
-            $result = $conn->execute_query($sql, [$emailUsuario, $cat]);
+            $result = $conn->execute_query($sql, [$user_email, $cat]);
             $row = $result->fetch_assoc();
             
-            $soma = (float)($row['total'] ?? 0);
+            $sum = (float)($row['total'] ?? 0);
             
-            if ($soma > $limite) {
-                $soma = $limite;
+            if ($sum > $limit) {
+                $sum = $limit;
             }
             
-            $categoriasSoma[$cat] = $soma;
+            $categories_sum[$cat] = $sum;
         } catch (Exception $e) {
-            $categoriasSoma[$cat] = 0;
+            $categories_sum[$cat] = 0;
         }
     }
 
-    foreach ($categoriasLimite as $cat => $limite) {
-        $soma = $categoriasSoma[$cat];
-        $porcentagem = ($limite > 0) ? floor(($soma / $limite) * 100) : 0;
-        if ($porcentagem > 100) {
-            $porcentagem = 100;
+    foreach ($categories_limit as $cat => $limit) {
+        $sum = $categories_sum[$cat];
+        $percentage = ($limit > 0) ? floor(($sum / $limit) * 100) : 0;
+        if ($percentage > 100) {
+            $percentage = 100;
         }
         
         $progressColor = "bg-primary";
-        if ($porcentagem >= 100) {
+        if ($percentage >= 100) {
             $progressColor = "bg-success";
-        } elseif ($porcentagem >= 75) {
+        } elseif ($percentage >= 75) {
             $progressColor = "bg-info";
-        } elseif ($porcentagem >= 50) {
+        } elseif ($percentage >= 50) {
             $progressColor = "bg-warning";
-        } elseif ($porcentagem > 0) {
+        } elseif ($percentage > 0) {
             $progressColor = "bg-danger";
         }
         
@@ -149,12 +149,12 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
           <a href='category.php?category=".urlencode($cat)."' class='text-decoration-none'>
             <div class='card text-center shadow-lg h-100'>
               <div class='card-body'>
-                <h6 class='card-title fw-bold mb-3'>{$nomesCategorias[$cat]}</h6>
+                <h6 class='card-title fw-bold mb-3'>{$categories[$cat]}</h6>
                 <div class='position-relative mb-2'>
-                  <div class='fw-bold mb-1'>{$soma}/{$limite}h</div>
+                  <div class='fw-bold mb-1'>{$sum}/{$limit}h</div>
                   <div class='progress'>
                     <div class='progress-bar $progressColor progress-bar-striped progress-bar-animated' 
-                         role='progressbar' style='width:{$porcentagem}%'></div>
+                         role='progressbar' style='width:{$percentage}%'>{$percentage}%</div>
                   </div>
                 </div>
               </div>
@@ -218,7 +218,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option selected disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach($nomesCategorias as $valor => $nome): ?>
+                <?php foreach($categories as $valor => $nome): ?>
                   <option value="<?php echo htmlspecialchars($valor); ?>">
                     <?php echo htmlspecialchars($nome); ?>
                   </option>
