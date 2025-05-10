@@ -14,7 +14,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_submit'])) {
     }
 
     $db = new db_connection();
-    $conn = $db->open();
+    $conn = $db->get_connection();
 
     $sql = "SELECT nome_do_arquivo FROM certificado WHERE fk_usuario_email = ?";
     $cert_result = $conn->execute_query($sql, [$_SESSION['user_email']]);
@@ -33,11 +33,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_submit'])) {
     $result = $conn->execute_query($sql, [$_SESSION['user_email']]);
 
     if ($result) {
-        $db->close();
+        $db->close_connection();
         session_unset();
         redirect_with_toast('../index.php', 'Conta excluída com sucesso', 'success');
     } else {
-        $db->close();
+        $db->close_connection();
         redirect_with_toast('../pages/dashboard.php', 'Erro ao excluir a conta');
     }
 } else {

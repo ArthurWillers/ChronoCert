@@ -107,7 +107,7 @@ $user_email = $_SESSION['user_email'];
     <?php
 
     $db = new db_connection();
-    $conn = $db->open();
+    $conn = $db->get_connection();
 
     $sql = "SELECT SUM(carga_horaria) AS total 
             FROM certificado 
@@ -170,7 +170,7 @@ $user_email = $_SESSION['user_email'];
     <div class="row">
       <?php
       $db = new db_connection();
-      $conn = $db->open();
+      $conn = $db->get_connection();
 
 
       $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria 

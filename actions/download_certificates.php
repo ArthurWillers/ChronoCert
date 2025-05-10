@@ -16,12 +16,12 @@ $tmp_dir = __DIR__ . '/../private/tmp/';
 $user_email = $_SESSION['user_email'];
 
 $db = new db_connection();
-$conn = $db->open();
+$conn = $db->get_connection();
 $sql = "SELECT nome_do_arquivo, nome_pessoal, categoria FROM certificado WHERE fk_usuario_email = ?";
 $result = $conn->execute_query($sql, [$user_email]);
 
 if (!$result || $result->num_rows == 0) {
-    $db->close();
+    $db->close_connection();
     redirect_with_toast("../pages/dashboard.php", "Nenhum certificado encontrado.", "warning");
     exit();
 }
@@ -33,7 +33,7 @@ $zip_path = $tmp_dir . uniqid('chronocert_', true) . '.zip';
 
 $zip = new ZipArchive();
 if ($zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== true) {
-    $db->close();
+    $db->close_connection();
     redirect_with_toast("../pages/dashboard.php", "Falha ao criar o arquivo zip.", "danger");
     exit();
 }
@@ -51,9 +51,9 @@ while ($file = $result->fetch_assoc()) {
         $has_files = true;
     }
 }
-$zip->close();
+$zip->close_connection();
 $result->free();
-$db->close();
+$db->close_connection();
 
 if (!$has_files || !file_exists($zip_path)) {
     redirect_with_toast("../pages/dashboard.php", "Não foi possível criar o arquivo ZIP.", "danger");

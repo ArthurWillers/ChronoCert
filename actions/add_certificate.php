@@ -11,7 +11,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_certificate'])) {
 
   $db = new db_connection();
-  $conn = $db->open();
+  $conn = $db->get_connection();
 
   $errors = [];
   $upload_dir = __DIR__ . '/../private/uploads/';
@@ -90,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_certificate']))
   }
 
 
-  $db->close();
+  $db->close_connection();
 
 
   if (!empty($errors)) {

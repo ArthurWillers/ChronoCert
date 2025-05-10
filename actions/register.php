@@ -23,13 +23,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     }
 
     $db = new db_connection();
-    $conn = $db->open();
+    $conn = $db->get_connection();
 
     $sql = "SELECT email FROM usuario WHERE email = ?";
     $result = $conn->execute_query($sql, [$email]);
     if ($result && $result->num_rows > 0) {
         $result->free();
-        $db->close();
+        $db->close_connection();
         redirect_with_toast('../pages/register.php', 'Este e-mail já está cadastrado');
     }
     if ($result) $result->free();
@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     $result = $conn->execute_query($sql, [$username_register]);
     if ($result && $result->num_rows > 0) {
         $result->free();
-        $db->close();
+        $db->close_connection();
         redirect_with_toast('../pages/register.php', 'Este nome de usuário já está cadastrado');
     }
     if ($result) $result->free();
@@ -48,10 +48,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     $sql = "INSERT INTO usuario (nome_de_usuario, email, senha) VALUES (?, ?, ?)";
     $result = $conn->execute_query($sql, [$username_register, $email, $hashed_password]);
     if ($result) {
-        $db->close();
+        $db->close_connection();
         redirect_with_toast('../pages/login.php', 'Cadastro realizado com sucesso', 'success');
     } else {
-        $db->close();
+        $db->close_connection();
         redirect_with_toast('../pages/register.php', 'Erro ao cadastrar usuário');
     }
 } else {

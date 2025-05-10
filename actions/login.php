@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_login'])) {
     }
 
     $db = new db_connection();
-    $conn = $db->open();
+    $conn = $db->get_connection();
 
     $sql = "SELECT * FROM usuario WHERE email = ?";
     $result = $conn->execute_query($sql, [$email_login]);
@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_login'])) {
     if ($result && $result->num_rows > 0) {
         $user = $result->fetch_assoc();
         $result->free();
-        $db->close();
+        $db->close_connection();
 
         if (password_verify($password_login, $user['senha'])) {
             session_unset();
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_login'])) {
         }
     } else {
         if ($result) $result->free();
-        $db->close();
+        $db->close_connection();
         session_unset();
         $_SESSION['logged_in'] = false;
         redirect_with_toast('../pages/login.php', 'E-mail ou senha incorretos');

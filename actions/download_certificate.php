@@ -18,22 +18,22 @@ if (empty($filename)) {
 $upload_dir = __DIR__ . '/../private/uploads/';
 
 $db = new db_connection();
-$conn = $db->open();
+$conn = $db->get_connection();
 $sql = "SELECT nome_do_arquivo, nome_pessoal, categoria FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
 $result = $conn->execute_query($sql, [$filename, $_SESSION['user_email']]);
 
 if (!$result || $result->num_rows == 0) {
-  $db->close();
+  $db->close_connection();
   redirect_with_toast("../pages/dashboard.php", "Certificado não encontrado ou você não tem permissão para baixá-lo.", "danger");
   exit();
 }
 
 $file = $result->fetch_assoc();
 $file_path = $upload_dir . $file['nome_do_arquivo'];
-$conn->close();
+$conn->close_connection();
 
 if (!file_exists($file_path)) {
-  $db->close();
+  $db->close_connection();
   redirect_with_toast("../pages/dashboard.php", "Arquivo não encontrado no servidor.", "danger");
   exit();
 }

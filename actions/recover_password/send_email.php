@@ -24,7 +24,7 @@ if (empty($email)) {
 
 require_once '../../private/config/db_connection.php';
 $db = new db_connection();
-$conn = $db->open();
+$conn = $db->get_connection();
 
 
 $sql = "SELECT * FROM usuario WHERE email = ?";
@@ -51,7 +51,7 @@ if ($result && $result->num_rows > 0) {
     $sql = "INSERT INTO codigo_de_verificacao (codigo, fk_usuario_email) VALUES (?, ?)";
     $conn->execute_query($sql, [$verification_code, $email]);
 
-    $db->close();
+    $db->close_connection();
 
 
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../../private/config');
@@ -130,7 +130,7 @@ if ($result && $result->num_rows > 0) {
     exit();
 } else {
     if ($result) $result->free();
-    $db->close();
+    $db->close_connection();
     redirect_with_toast('../../pages/recover_password/enter_email.php', 'E-mail não encontrado', 'danger');
     exit();
 }

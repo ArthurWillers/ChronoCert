@@ -23,7 +23,7 @@ $user_email = $_SESSION['user_email'];
 
 
 $db = new db_connection();
-$conn = $db->open();
+$conn = $db->get_connection();
 
 try {
 
@@ -60,5 +60,5 @@ try {
 } catch (Exception $e) {
   redirect_with_toast($redirect_url, "Erro ao excluir o certificado: " . $e->getMessage());
 } finally {
-  $conn->close();
+  $conn->close_connection();
 }

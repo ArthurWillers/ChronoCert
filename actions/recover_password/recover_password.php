@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_recover_passwor
 
   require_once '../../private/config/db_connection.php';
   $db = new db_connection();
-  $conn = $db->open();
+  $conn = $db->get_connection();
 
 
   $sql = "SELECT * FROM codigo_de_verificacao WHERE codigo = ? AND fk_usuario_email = ?";
@@ -52,13 +52,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_recover_passwor
     $conn->execute_query($sql, [$verification_code, $email]);
 
     $result->free();
-    $db->close();
+    $db->close_connection();
 
     redirect_with_toast('../../pages/login.php', 'Senha alterada com sucesso', 'success');
     exit();
   } else {
     if ($result) $result->free();
-    $db->close();
+    $db->close_connection();
     redirect_with_toast('../../pages/recover_password/recover_password.php', 'Código de verificação inválido ou expirado', 'danger');
     exit();
   }

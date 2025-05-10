@@ -7,7 +7,7 @@ $dotenv->load();
 class db_connection {
     private $conn;
 
-    public function open() {
+    public function get_connection() {
         $host = $_ENV['DB_HOST'];
         $username = $_ENV['DB_USERNAME'];
         $password = $_ENV['DB_PASSWORD'];
@@ -20,9 +20,9 @@ class db_connection {
         return $this->conn;
     }
 
-    public function close() {
+    public function close_connection() {
         if ($this->conn) {
-            $this->conn->close();
+            $this->conn->close_connection();
         }
     }
 }

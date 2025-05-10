@@ -101,7 +101,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       $user_email = $_SESSION['user_email'];
 
       $db = new db_connection();
-      $conn = $db->open();
+      $conn = $db->get_connection();
 
       $categories_sum = [];
       foreach ($categories_limit as $cat => $limit) {
