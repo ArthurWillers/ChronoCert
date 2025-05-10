@@ -205,7 +205,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
         <div class="modal-body">
           <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
-              <label class="form-label">Nome Pessoal</label>
+              <label class="form-label">Nome</label>
               <input type="text" class="form-control" name="nome_pessoal" placeholder="Digite o nome que consta no certificado" maxlength="255" required>
             </div>
 
