@@ -241,31 +241,6 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     </div>
   </div>
 
-  <div class="modal fade" id="download_certificates_modal" tabindex="-1" aria-labelledby="download_certificates_modal_label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="download_certificates_modal_label">Download Certificados</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form action="../actions/download_certificates.php" method="POST">
-            <div class="mb-3">
-              <label class="form-label">Selecione o formato:</label>
-              <select name="format" class="form-select" required>
-                <option selected disabled value="">Selecione o formato</option>
-                <option value="pdf">PDF</option>
-                <option value="zip">ZIP</option>
-              </select>
-            </div>
-            <div class="d-grid">
-              <button type="submit" class="btn btn-primary" name="download_submit">Download</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <?php include '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
