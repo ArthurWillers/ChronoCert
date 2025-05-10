@@ -1,10 +1,12 @@
 <?php
-function set_toast($message, $type = 'warning') {
+function set_toast($message, $type = 'warning')
+{
     $_SESSION['message'] = $message;
     $_SESSION['message_type'] = $type;
 }
 
-function render_toast() {
+function render_toast()
+{
     if (isset($_SESSION['message'])) {
         $toast_class = 'text-bg-' . $_SESSION['message_type'];
         echo '<div class="toast-container top-0 start-50 translate-middle-x mt-2">
@@ -20,9 +22,9 @@ function render_toast() {
     }
 }
 
-function redirect_with_toast($location, $message, $type = 'danger') {
+function redirect_with_toast($location, $message, $type = 'danger')
+{
     set_toast($message, $type);
     header("Location: $location");
     exit();
 }
-?>

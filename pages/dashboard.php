@@ -59,94 +59,94 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       </div>
     </div>
   </nav>
-  
+
   <div class="container-fluid pb-5">
-        
+
     <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3 mt-3">
 
-    <?php 
+      <?php
 
-    $categories_limit = [
-      'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
-      'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
-      'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
-      'Voluntario_em_Areas_do_Curso' => 20,
-      'Estagio_Nao_Obrigatorio' => 40,
-      'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 20,
-      'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 30,
-      'Curso_de_Formacao_na_Area_Especifica' => 40,
-      'Ouvinte_em_apresentacao_de_trabalhos' => 10,
-      'Curso_de_Linguas' => 30,
-      'Monitor_em_Areas_do_Curso' => 30,
-      'Participacoes_Artisticas_e_Institucionais' => 20,
-      'Atividades_Colegiais_Representativas' => 20
-    ];
-    
-    $categories = [
-      'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
-      'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
-      'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
-      'Voluntario_em_Areas_do_Curso' => 'Voluntário em Áreas do Curso',
-      'Estagio_Nao_Obrigatorio' => 'Estágio Não Obrigatório',
-      'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 'Publicação, Apresentação e Premiação de Trabalhos',
-      'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 'Visitas e Viagens de Estudo relacionadas ao Curso',
-      'Curso_de_Formacao_na_Area_Especifica' => 'Curso de Formação na Área Específica',
-      'Ouvinte_em_apresentacao_de_trabalhos' => 'Ouvinte em apresentação de trabalhos',
-      'Curso_de_Linguas' => 'Curso de Línguas',
-      'Monitor_em_Areas_do_Curso' => 'Monitor em Áreas do Curso',
-      'Participacoes_Artisticas_e_Institucionais' => 'Participações Artísticas e Institucionais',
-      'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
-    ];
+      $categories_limit = [
+        'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
+        'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
+        'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
+        'Voluntario_em_Areas_do_Curso' => 20,
+        'Estagio_Nao_Obrigatorio' => 40,
+        'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 20,
+        'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 30,
+        'Curso_de_Formacao_na_Area_Especifica' => 40,
+        'Ouvinte_em_apresentacao_de_trabalhos' => 10,
+        'Curso_de_Linguas' => 30,
+        'Monitor_em_Areas_do_Curso' => 30,
+        'Participacoes_Artisticas_e_Institucionais' => 20,
+        'Atividades_Colegiais_Representativas' => 20
+      ];
 
-    $user_email = $_SESSION['user_email'];
+      $categories = [
+        'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
+        'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
+        'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
+        'Voluntario_em_Areas_do_Curso' => 'Voluntário em Áreas do Curso',
+        'Estagio_Nao_Obrigatorio' => 'Estágio Não Obrigatório',
+        'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 'Publicação, Apresentação e Premiação de Trabalhos',
+        'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 'Visitas e Viagens de Estudo relacionadas ao Curso',
+        'Curso_de_Formacao_na_Area_Especifica' => 'Curso de Formação na Área Específica',
+        'Ouvinte_em_apresentacao_de_trabalhos' => 'Ouvinte em apresentação de trabalhos',
+        'Curso_de_Linguas' => 'Curso de Línguas',
+        'Monitor_em_Areas_do_Curso' => 'Monitor em Áreas do Curso',
+        'Participacoes_Artisticas_e_Institucionais' => 'Participações Artísticas e Institucionais',
+        'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
+      ];
 
-    $db = new db_connection();
-    $conn = $db->open();
-    
-    $categories_sum = [];
-    foreach ($categories_limit as $cat => $limit) {
+      $user_email = $_SESSION['user_email'];
+
+      $db = new db_connection();
+      $conn = $db->open();
+
+      $categories_sum = [];
+      foreach ($categories_limit as $cat => $limit) {
         try {
-            $sql = "SELECT SUM(carga_horaria) AS total 
+          $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
                     WHERE fk_usuario_email = ? 
                     AND FIND_IN_SET(?, categoria) > 0";
-            
-            $result = $conn->execute_query($sql, [$user_email, $cat]);
-            $row = $result->fetch_assoc();
-            
-            $sum = (float)($row['total'] ?? 0);
-            
-            if ($sum > $limit) {
-                $sum = $limit;
-            }
-            
-            $categories_sum[$cat] = $sum;
-        } catch (Exception $e) {
-            $categories_sum[$cat] = 0;
-        }
-    }
 
-    foreach ($categories_limit as $cat => $limit) {
+          $result = $conn->execute_query($sql, [$user_email, $cat]);
+          $row = $result->fetch_assoc();
+
+          $sum = (float)($row['total'] ?? 0);
+
+          if ($sum > $limit) {
+            $sum = $limit;
+          }
+
+          $categories_sum[$cat] = $sum;
+        } catch (Exception $e) {
+          $categories_sum[$cat] = 0;
+        }
+      }
+
+      foreach ($categories_limit as $cat => $limit) {
         $sum = $categories_sum[$cat];
         $percentage = ($limit > 0) ? floor(($sum / $limit) * 100) : 0;
         if ($percentage > 100) {
-            $percentage = 100;
+          $percentage = 100;
         }
-        
+
         $progressColor = "bg-primary";
         if ($percentage >= 100) {
-            $progressColor = "bg-success";
+          $progressColor = "bg-success";
         } elseif ($percentage >= 75) {
-            $progressColor = "bg-info";
+          $progressColor = "bg-info";
         } elseif ($percentage >= 50) {
-            $progressColor = "bg-warning";
+          $progressColor = "bg-warning";
         } elseif ($percentage > 0) {
-            $progressColor = "bg-danger";
+          $progressColor = "bg-danger";
         }
-        
+
         echo "
         <div class='col align-items-stretch'>
-          <a href='category.php?category=".urlencode($cat)."' class='text-decoration-none'>
+          <a href='category.php?category=" . urlencode($cat) . "' class='text-decoration-none'>
             <div class='card text-center shadow-lg h-100'>
               <div class='card-body'>
                 <h6 class='card-title fw-bold mb-3'>{$categories[$cat]}</h6>
@@ -162,8 +162,8 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
           </a>
         </div>
         ";
-    }
-    ?>
+      }
+      ?>
 
     </div>
   </div>
@@ -177,18 +177,18 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
         </div>
         <div class="modal-body">
           <form action="../actions/delete_account.php" method="POST">
-          <div class="mb-3">
-                <label class="form-label">Email:</label>
-                <input type="text" class="form-control" id="delete_email" name="delete_email" readonly>
-              </div>
-              <div class="mb-3">
-                <label for="delete_confirm_email" class="form-label">Digite o e-mail para confirmar:</label>
-                <input type="email" class="form-control" name="delete_confirm_email" id="delete_confirm_email" required>
-                <div id="email_feedback" class="form-text text-danger d-none">O e-mail não confere.</div>
-              </div>
-              <div class="text-end">
-                <button type="submit" id="delete_account_btn" class="btn btn-danger" name="delete_submit" disabled>Excluir Conta</button>
-              </div>
+            <div class="mb-3">
+              <label class="form-label">Email:</label>
+              <input type="text" class="form-control" id="delete_email" name="delete_email" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="delete_confirm_email" class="form-label">Digite o e-mail para confirmar:</label>
+              <input type="email" class="form-control" name="delete_confirm_email" id="delete_confirm_email" required>
+              <div id="email_feedback" class="form-text text-danger d-none">O e-mail não confere.</div>
+            </div>
+            <div class="text-end">
+              <button type="submit" id="delete_account_btn" class="btn btn-danger" name="delete_submit" disabled>Excluir Conta</button>
+            </div>
           </form>
         </div>
       </div>
@@ -218,7 +218,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option selected disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach($categories as $valor => $nome): ?>
+                <?php foreach ($categories as $valor => $nome): ?>
                   <option value="<?php echo htmlspecialchars($valor); ?>">
                     <?php echo htmlspecialchars($nome); ?>
                   </option>
@@ -246,11 +246,11 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
   <script src="../assets/js/toast.js"></script>
   <script>
     function open_delete_modal(email) {
-        document.getElementById("email_feedback").classList.add("d-none");
-        document.getElementById("delete_confirm_email").value = "";
-        document.getElementById("delete_email").value = email;
-        const modal = new bootstrap.Modal(document.getElementById("delete_account_modal"));
-        modal.show();
+      document.getElementById("email_feedback").classList.add("d-none");
+      document.getElementById("delete_confirm_email").value = "";
+      document.getElementById("delete_email").value = email;
+      const modal = new bootstrap.Modal(document.getElementById("delete_account_modal"));
+      modal.show();
     }
 
     document.getElementById("delete_confirm_email").addEventListener("input", function() {
@@ -270,7 +270,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
         deleteBtn.disabled = true;
       }
     });
-      
+
     document.addEventListener("DOMContentLoaded", function() {
       const certModal = document.getElementById('add_certificate_modal');
       const form = document.querySelector("#add_certificate_modal form");
@@ -279,56 +279,56 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       const nomePessoal = form.querySelector('input[name="nome_pessoal"]');
       const cargaHoraria = form.querySelector('input[name="carga_horaria"]');
       const categoria = form.querySelector('select[name="categoria"]');
-      
+
       const errorMsg = document.createElement("div");
       errorMsg.id = "file_error_message";
       errorMsg.className = "text-danger mt-2";
       fileInput.parentNode.appendChild(errorMsg);
-      
+
       certModal.addEventListener('show.bs.modal', function() {
         form.reset();
         errorMsg.textContent = "";
         submitBtn.disabled = true;
       });
-      
+
       function validateForm() {
         const maxSize = 10 * 1024 * 1024; // 10MB 
         let isValid = true;
-        
+
         errorMsg.textContent = "";
-        
+
         if (!nomePessoal.value.trim() || !categoria.value || !cargaHoraria.value || cargaHoraria.value <= 0) {
           isValid = false;
         }
-        
-        
+
+
 
         if (!fileInput.files || fileInput.files.length === 0) {
           isValid = false;
         } else {
           const file = fileInput.files[0];
-          
+
           if (!file.type.match('application/pdf')) {
             errorMsg.textContent = "Erro: Apenas arquivos PDF são permitidos.";
             isValid = false;
           }
-          
+
           if (file.size > maxSize) {
-            errorMsg.textContent = "Erro: O tamanho máximo permitido é 10MB. Seu arquivo tem " + 
-                                  (file.size / (1024 * 1024)).toFixed(2) + "MB.";
+            errorMsg.textContent = "Erro: O tamanho máximo permitido é 10MB. Seu arquivo tem " +
+              (file.size / (1024 * 1024)).toFixed(2) + "MB.";
             isValid = false;
           }
         }
-        
+
         submitBtn.disabled = !isValid;
       }
-      
+
 
       nomePessoal.addEventListener("input", validateForm);
       cargaHoraria.addEventListener("input", validateForm);
       categoria.addEventListener("change", validateForm);
       fileInput.addEventListener("change", validateForm);
-      
+
 
       validateForm();
     });

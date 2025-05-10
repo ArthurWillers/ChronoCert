@@ -363,7 +363,7 @@ $user_email = $_SESSION['user_email'];
 
         const modalCertName = deleteModal.querySelector('#cert-name');
         const fileInput = deleteModal.querySelector('#file-to-delete');
-        
+
         if (modalCertName) modalCertName.textContent = certName;
         if (fileInput) fileInput.value = fileName;
       });

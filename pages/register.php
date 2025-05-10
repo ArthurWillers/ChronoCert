@@ -1,5 +1,5 @@
-<?php 
-require_once '../includes/session_start.php'; 
+<?php
+require_once '../includes/session_start.php';
 require_once '../includes/toast.php';
 ?>
 
