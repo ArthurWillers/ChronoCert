@@ -17,7 +17,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="../assets/img/ChronoCert_logo.png">
+  <link rel="icon" type="image/x-icon" href="../assets/img/ChronoCert_logo.svg">
   <?php include '../includes/bootstrap_styles.php' ?>
   <link rel="stylesheet" href="../assets/css/bootstrap_custom.css">
   <title>Dashboard - ChronoCert</title>
@@ -29,7 +29,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="../assets/img/ChronoCert_logo.png" alt="Logo" height="35" class="d-inline-block">
+        <img src="../assets/img/ChronoCert_logo_white.png" alt="Logo" height="35" class="d-inline-block">
         <span class="ms-2 align-middle">ChronoCert</span>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_content" aria-controls="navbar_content" aria-expanded="false" aria-label="Toggle navigation">

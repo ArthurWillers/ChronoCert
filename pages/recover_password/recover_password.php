@@ -9,7 +9,7 @@ require_once '../../includes/toast.php';
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="../../assets/img/ChronoCert_logo.png">
+  <link rel="icon" type="image/x-icon" href="../../assets/img/ChronoCert_logo.svg">
   <?php include '../../includes/bootstrap_styles.php' ?>
   <link rel="stylesheet" href="../../assets/css/bootstrap_custom.css">
   <title>Redefinir Senha - ChronoCert</title>
@@ -21,7 +21,7 @@ require_once '../../includes/toast.php';
   <nav class="navbar navbar-dark bg-primary fixed-top">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <img src="../../assets/img/ChronoCert_logo.png" alt="Logo" height="35" class="d-inline-block">
+        <img src="../../assets/img/ChronoCert_logo_white.png" alt="Logo" height="35" class="d-inline-block">
         <span class="ms-2 align-middle">ChronoCert</span>
       </a>
       <a class="btn btn-outline-light" href="../../index.php">Voltar</a>
