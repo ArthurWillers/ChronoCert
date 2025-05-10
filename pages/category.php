@@ -265,7 +265,7 @@ $user_email = $_SESSION['user_email'];
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option selected disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach ($nomesCategorias as $valor => $nome): ?>
+                <?php foreach ($categories as $valor => $nome): ?>
                   <option value="<?php echo htmlspecialchars($valor); ?>">
                     <?php echo htmlspecialchars($nome); ?>
                   </option>
