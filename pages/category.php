@@ -194,16 +194,20 @@ $user_email = $_SESSION['user_email'];
                 <div class='card-body text-center'>
                   <h5 class='card-title text-truncate' title='$display_name'>$display_name</h5>
                   <p class='card-text mb-2'>Carga horária: $hours h</p>
-                  <div class='d-flex justify-content-center gap-5'>
-                    <a href='../actions/download_certificate.php?filename=$file_name' class='btn btn-sm btn-primary'>
-                      <i class='bi bi-cloud-download'></i> Download
-                    </a>
-                    <button class='btn btn-sm btn-danger' data-bs-toggle='modal' 
-                            data-bs-target='#deleteModal' 
-                            data-file='$file_name' 
-                            data-name='$display_name'>
-                      <i class='bi bi-trash'></i> Excluir
-                    </button>
+                  <div class='row g-2'>
+                    <div class='col-6'>
+                      <a href='../actions/download_certificate.php?filename=$file_name' class='btn btn-sm btn-primary w-100'>
+                        <i class='bi bi-cloud-download'></i> Download
+                      </a>
+                    </div>
+                    <div class='col-6'>
+                      <button class='btn btn-sm btn-danger w-100' data-bs-toggle='modal' 
+                              data-bs-target='#deleteModal' 
+                              data-file='$file_name' 
+                              data-name='$display_name'>
+                        <i class='bi bi-trash'></i> Excluir
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
