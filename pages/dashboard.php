@@ -42,7 +42,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
               Adicionar Certificado
             </a>
             <a class="btn btn-outline-light mb-2 mb-lg-0 ms-lg-2" href="../actions/download_certificates.php">
-              Download Certificados
+              Baixar Certificados
             </a>
           </li>
           <li class="nav-item dropdown ">
