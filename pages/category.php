@@ -196,7 +196,7 @@ $user_email = $_SESSION['user_email'];
                   <p class='card-text mb-2'>Carga horária: $hours h</p>
                   <div class='d-flex justify-content-center gap-5'>
                     <a href='../actions/download_certificate.php?filename=$file_name' class='btn btn-sm btn-primary'>
-                      <i class='bi bi-download'></i> Download
+                      <i class='bi bi-cloud-download'></i> Download
                     </a>
                     <button class='btn btn-sm btn-danger' data-bs-toggle='modal' 
                             data-bs-target='#deleteModal' 
