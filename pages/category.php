@@ -82,10 +82,10 @@ $user_email = $_SESSION['user_email'];
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 flex-column flex-lg-row">
           <li class="nav-item mb-2 mb-lg-0 me-lg-3">
             <a class="btn btn-outline-light mb-2 mb-lg-0" href="#" data-bs-toggle="modal" data-bs-target="#add_certificate_modal">
-              Adicionar Certificado
+              <i class="bi bi-cloud-upload"></i> Adicionar Certificado
             </a>
             <a class="btn btn-outline-light mb-2 mb-lg-0 ms-lg-2" href="../actions/download_certificates.php">
-              Baixar Certificados
+              <i class="bi bi-cloud-download"></i> Baixar Certificados
             </a>
           </li>
           <li class="nav-item dropdown ">
