@@ -71,7 +71,7 @@ $user_email = $_SESSION['user_email'];
 
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
     <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center" href="#">
+      <a class="navbar-brand d-flex align-items-center" href="./dashboard.php">
         <img src="../assets/img/ChronoCert_logo_white.png" alt="Logo" height="35" class="d-inline-block">
         <span class="ms-2 align-middle">ChronoCert</span>
       </a>
