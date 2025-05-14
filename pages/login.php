@@ -50,7 +50,7 @@ require_once '../includes/toast.php';
               <a href="./recover_password/enter_email.php" class="text-decoration-none">Esqueceu sua senha?</a>
             </div>
 
-            <button type="submit" name="submit_login" class="btn btn-primary w-100 mt-3" disabled>Entrar</button>
+            <button type="submit" name="submit_login" class="btn btn-primary w-100 mt-3">Entrar</button>
 
             <div class="text-center mt-3">
               <span>Ainda não tem uma conta?</span>
