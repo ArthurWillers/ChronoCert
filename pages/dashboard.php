@@ -30,7 +30,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <img src="../assets/img/ChronoCert_logo_white.png" alt="Logo" height="35" class="d-inline-block">
-        <span class="ms-2 align-middle">ChronoCert</span>
+        <span class="ms-2 align-middle fw-bold">ChronoCert</span>
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar_content" aria-controls="navbar_content" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>

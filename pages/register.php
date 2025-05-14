@@ -22,7 +22,7 @@ require_once '../includes/toast.php';
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <img src="../assets/img/ChronoCert_logo_white.png" alt="Logo" height="35" class="d-inline-block">
-        <span class="ms-2 align-middle">ChronoCert</span>
+        <span class="ms-2 align-middle fw-bold">ChronoCert</span>
       </a>
       <a class="btn btn-outline-light" href="../index.php">Voltar</a>
     </div>
