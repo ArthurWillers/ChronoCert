@@ -72,7 +72,8 @@ require_once '../includes/toast.php';
     </div>
   </div>
 
-
+  <?php include '../includes/spinner.php'?>
+  <script src="../assets/js/spinner.js"></script>
   <?php require_once '../includes/bootstrap_script.php' ?>
   <script>
     document.addEventListener('DOMContentLoaded', () => {

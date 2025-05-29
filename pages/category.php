@@ -270,8 +270,8 @@ $user_email = $_SESSION['user_email'];
               <select name="categoria" class="form-select" required>
                 <option disabled value="">Selecione a categoria do certificado</option>
                 <?php foreach ($categories as $valor => $nome): ?>
-                  <option value="<?php echo htmlspecialchars($valor); ?>" 
-                          <?php echo ($valor === $category) ? 'selected' : ''; ?>>
+                  <option value="<?php echo htmlspecialchars($valor); ?>"
+                    <?php echo ($valor === $category) ? 'selected' : ''; ?>>
                     <?php echo htmlspecialchars($nome); ?>
                   </option>
                 <?php endforeach; ?>
@@ -293,7 +293,8 @@ $user_email = $_SESSION['user_email'];
     </div>
   </div>
 
-
+  <?php include '../includes/spinner.php' ?>
+  <script src="../assets/js/spinner.js"></script>
   <?php include '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
   <script>

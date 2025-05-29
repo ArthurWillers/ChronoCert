@@ -44,6 +44,8 @@ require_once '../../includes/toast.php';
     </div>
   </div>
 
+  <?php include '../includes/spinner.php'?>
+  <script src="../assets/js/spinner.js"></script>
   <?php include '../../includes/bootstrap_script.php' ?>
   <script src="../../assets/js/toast.js"></script>
   <script>

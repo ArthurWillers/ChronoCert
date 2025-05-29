@@ -62,6 +62,8 @@ require_once '../includes/toast.php';
     </div>
   </div>
 
+  <?php include '../includes/spinner.php'?>
+  <script src="../assets/js/spinner.js"></script>
   <?php require_once '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
   <script src="../assets/js/toggle_password_visibility.js"></script>

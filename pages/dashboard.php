@@ -51,7 +51,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
             </a>
             <ul class="dropdown-menu dropdown-menu-end " style="right:0; left:auto;">
               <li><a class="dropdown-item" href="../actions/logout.php">Deslogar</a></li>
-              <li><a class="dropdown-item" href="../actions/recover_password/send_email.php">Alterar Senha</a></li>
+              <li><a class="dropdown-item spinner-trigger" href="../actions/recover_password/send_email.php">Alterar Senha</a></li>
               <li><a class="dropdown-item" href="javascript:void(0);" onclick="open_delete_modal('<?php echo htmlspecialchars($_SESSION['user_email']); ?>')">Excluir Conta</a></li>
             </ul>
           </li>
@@ -241,7 +241,8 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     </div>
   </div>
 
-
+  <?php include '../includes/spinner.php'?>
+  <script src="../assets/js/spinner.js"></script>
   <?php include '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
   <script>
