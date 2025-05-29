@@ -1,4 +1,7 @@
 /vendor/
 
 /private/config/.env
-/private/uploads/
+/private/uploads/*
+!/private/uploads/.gitkeep
+/private/tmp/*
+!/private/tmp/.gitkeep
