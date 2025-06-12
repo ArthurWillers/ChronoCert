@@ -81,6 +81,9 @@ $user_email = $_SESSION['user_email'];
       <div class="collapse navbar-collapse" id="navbar_content">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0 flex-column flex-lg-row">
           <li class="nav-item mb-2 mb-lg-0 me-lg-3">
+            <a class="btn btn-outline-light mb-2 mb-lg-0" href="./dashboard.php">
+              Voltar ao Dashboard
+            </a>
             <a class="btn btn-outline-light mb-2 mb-lg-0" href="#" data-bs-toggle="modal" data-bs-target="#add_certificate_modal">
               <i class="bi bi-cloud-upload"></i> Adicionar Certificado
             </a>
