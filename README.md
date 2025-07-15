@@ -67,7 +67,7 @@ Copie o arquivo de exemplo e configure suas credenciais:
 cp private/config/.env.exemple private/config/.env
 ```
 
-Edite o arquivo `.env` com suas configurações:
+Edite o arquivo `private/config/.env` com suas configurações:
 
 ```bash
 # DB Connection
