@@ -19,7 +19,7 @@ $upload_dir = __DIR__ . '/../private/uploads/';
 
 $db = new db_connection();
 $conn = $db->get_connection();
-$sql = "SELECT nome_do_arquivo, nome_pessoal, categoria FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
+$sql = "SELECT nome_do_arquivo, nome_pessoal, fk_categoria_id FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
 $result = $conn->execute_query($sql, [$filename, $_SESSION['user_email']]);
 
 if (!$result || $result->num_rows == 0) {
