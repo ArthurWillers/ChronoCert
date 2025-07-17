@@ -64,7 +64,7 @@ mysql -u root -p ChronoCert < private/config/schema.sql
 Copie o arquivo de exemplo e configure suas credenciais:
 
 ```bash
-cp private/config/.env.exemple private/config/.env
+cp private/config/.env.example private/config/.env
 ```
 
 Edite o arquivo `private/config/.env` com suas configurações:
