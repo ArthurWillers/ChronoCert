@@ -30,6 +30,8 @@ if (!$result || $result->num_rows == 0) {
 
 $file = $result->fetch_assoc();
 
+
+// Nomes das categorias
 $sql_cat = "SELECT nome FROM categoria WHERE id = ?";
 $result_cat = $conn->execute_query($sql_cat, [$file['fk_categoria_id']]);
 $category = $result_cat->fetch_assoc();
