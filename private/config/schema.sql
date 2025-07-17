@@ -2,10 +2,29 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
+-- Estrutura para tabela `categoria`
+
 CREATE TABLE `categoria` (
   `id` int(11) NOT NULL,
   `nome` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+-- Inserção de dados na tabela `categoria`
+INSERT INTO `categoria` (`id`, `nome`) VALUES
+(1, 'Bolsa_Projetos_de_Ensino_e_Extensoes'),
+(2, 'Ouvinte_em_Eventos_relacionados_ao_Curso'),
+(3, 'Organizador_em_Eventos_relacionados_ao_Curso'),
+(4, 'Voluntario_em_Areas_do_Curso'),
+(5, 'Estagio_Nao_Obrigatorio'),
+(6, 'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos'),
+(7, 'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso'),
+(8, 'Curso_de_Formacao_na_Area_Especifica'),
+(9, 'Ouvinte_em_apresentacao_de_trabalhos'),
+(10, 'Curso_de_Linguas'),
+(11, 'Monitor_em_Areas_do_Curso'),
+(12, 'Participacoes_Artisticas_e_Institucionais'),
+(13, 'Atividades_Colegiais_Representativas');
 
 -- Estrutura para tabela `certificado`
 CREATE TABLE `certificado` (
