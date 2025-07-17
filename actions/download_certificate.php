@@ -29,17 +29,21 @@ if (!$result || $result->num_rows == 0) {
 }
 
 $file = $result->fetch_assoc();
+
+$sql_cat = "SELECT nome FROM categoria WHERE id = ?";
+$result_cat = $conn->execute_query($sql_cat, [$file['fk_categoria_id']]);
+$category = $result_cat->fetch_assoc();
+
 $file_path = $upload_dir . $file['nome_do_arquivo'];
 $db->close_connection();
 
 if (!file_exists($file_path)) {
-  $db->close_connection();
   redirect_with_toast("../pages/dashboard.php", "Arquivo não encontrado no servidor.", "danger");
   exit();
 }
 
 $base_name = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $file['nome_pessoal']);
-$category_name = str_replace('_', ' ', $file['categoria']);
+$category_name = str_replace('_', ' ', $category['nome']);
 $internal_name = $base_name . " - " . $category_name . ".pdf";
 
 header('Content-Type: application/pdf');
