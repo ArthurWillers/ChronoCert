@@ -53,8 +53,7 @@ require_once '../includes/toast.php';
             <button type="submit" name="submit_login" class="btn btn-primary w-100 mt-3">Entrar</button>
 
             <div class="text-center mt-3">
-              <span>Ainda não tem uma conta?</span>
-              <a href="./register.php" class="text-decoration-none cursor-pointer">Cadastre-se</a>
+              <span class="text-muted">Apenas coordenadores podem cadastrar novos alunos</span>
             </div>
           </form>
         </div>

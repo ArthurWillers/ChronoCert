@@ -31,9 +31,9 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 
     
     <div class="d-flex justify-content-center gap-3 mt-4">
-      <a href="./pages/register.php" class="btn btn-outline-light btn-lg">Criar Conta</a>
       <a href="./pages/login.php" class="btn btn-outline-light btn-lg">Entrar</a>
     </div>
+    <p class="mt-3 text-white-50">Apenas coordenadores podem cadastrar novos alunos</p>
   </div>
 
   <?php include './includes/bootstrap_script.php' ?>

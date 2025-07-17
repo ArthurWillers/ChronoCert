@@ -27,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_login'])) {
             session_unset();
             $_SESSION['user_email'] = $user['email'];
             $_SESSION['username'] = $user['nome_de_usuario'];
+            $_SESSION['user_type'] = $user['tipo_de_conta'];
             $_SESSION['logged_in'] = true;
             redirect_with_toast('../pages/dashboard.php', 'Login realizado com sucesso', 'success');
         } else {

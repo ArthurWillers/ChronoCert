@@ -8,48 +8,35 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
   redirect_with_toast('../index.php', "Você não está logado. Faça login para deletar a conta.");
 }
 
-$categories = [
-  'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
-  'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
-  'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
-  'Voluntario_em_Areas_do_Curso' => 'Voluntário em Áreas do Curso',
-  'Estagio_Nao_Obrigatorio' => 'Estágio Não Obrigatório',
-  'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 'Publicação, Apresentação e Premiação de Trabalhos',
-  'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 'Visitas e Viagens de Estudo relacionadas ao Curso',
-  'Curso_de_Formacao_na_Area_Especifica' => 'Curso de Formação na Área Específica',
-  'Ouvinte_em_apresentacao_de_trabalhos' => 'Ouvinte em Apresentação de Trabalhos',
-  'Curso_de_Linguas' => 'Curso de Línguas',
-  'Monitor_em_Areas_do_Curso' => 'Monitor em Áreas do Curso',
-  'Participacoes_Artisticas_e_Institucionais' => 'Participações Artísticas e Institucionais',
-  'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
-];
+// Redirect coordinators to their specific dashboard
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'coordenador') {
+  header('Location: coordinator_dashboard.php');
+  exit();
+}
 
-$category_limit = [
-  'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
-  'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
-  'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
-  'Voluntario_em_Areas_do_Curso' => 20,
-  'Estagio_Nao_Obrigatorio' => 40,
-  'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 20,
-  'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 30,
-  'Curso_de_Formacao_na_Area_Especifica' => 40,
-  'Ouvinte_em_apresentacao_de_trabalhos' => 10,
-  'Curso_de_Linguas' => 30,
-  'Monitor_em_Areas_do_Curso' => 30,
-  'Participacoes_Artisticas_e_Institucionais' => 20,
-  'Atividades_Colegiais_Representativas' => 20
-];
-
-$category = $_GET['category'] ?? null;
-if ($category === null) {
+$category_id = $_GET['category'] ?? null;
+if ($category_id === null) {
   redirect_with_toast('./dashboard.php', "Categoria não especificada.");
 }
 
-if (!array_key_exists($category, $categories)) {
+$db = new db_connection();
+$conn = $db->get_connection();
+
+// Get category info from database
+$sql_category = "SELECT * FROM categoria WHERE id = ?";
+$category_result = $conn->execute_query($sql_category, [$category_id]);
+
+if (!$category_result || $category_result->num_rows === 0) {
+  if ($category_result) $category_result->free();
+  $db->close_connection();
   redirect_with_toast('./dashboard.php', "Categoria inválida.");
 }
-$category_name = $categories[$category];
-$category_limit = $category_limit[$category];
+
+$category_data = $category_result->fetch_assoc();
+$category_result->free();
+
+$category_name = $category_data['nome'];
+$category_limit = 40; // Default limit, could be made configurable later
 
 $user_email = $_SESSION['user_email'];
 ?>
@@ -109,19 +96,17 @@ $user_email = $_SESSION['user_email'];
 
     <?php
 
-    $db = new db_connection();
-    $conn = $db->get_connection();
-
     $sql = "SELECT SUM(carga_horaria) AS total 
             FROM certificado 
             WHERE fk_usuario_email = ? 
-            AND FIND_IN_SET(?, categoria) > 0";
+            AND fk_categoria_id = ?";
 
     try {
-      $result = $conn->execute_query($sql, [$user_email, $category]);
+      $result = $conn->execute_query($sql, [$user_email, $category_id]);
       $row = $result->fetch_assoc();
       $total_hours = (float)($row['total'] ?? 0);
 
+      if ($result) $result->free();
 
       if ($total_hours > $category_limit) {
         $total_hours = $category_limit;
@@ -172,18 +157,15 @@ $user_email = $_SESSION['user_email'];
 
     <div class="row">
       <?php
-      $db = new db_connection();
-      $conn = $db->get_connection();
-
 
       $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria 
               FROM certificado 
               WHERE fk_usuario_email = ? 
-              AND FIND_IN_SET(?, categoria) > 0
+              AND fk_categoria_id = ?
               ORDER BY nome_pessoal";
 
       try {
-        $result = $conn->execute_query($sql, [$user_email, $category]);
+        $result = $conn->execute_query($sql, [$user_email, $category_id]);
 
         if ($result->num_rows > 0) {
           while ($cert = $result->fetch_assoc()) {
@@ -241,7 +223,7 @@ $user_email = $_SESSION['user_email'];
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
           <form action="../actions/delete_certificate.php" method="POST">
             <input type="hidden" name="file_name" id="file-to-delete">
-            <input type="hidden" name="redirect" value="category.php?category=<?php echo urlencode($category); ?>">
+            <input type="hidden" name="redirect" value="category.php?category=<?php echo urlencode($category_id); ?>">
             <button type="submit" class="btn btn-danger">Excluir</button>
           </form>
         </div>
@@ -272,12 +254,21 @@ $user_email = $_SESSION['user_email'];
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach ($categories as $valor => $nome): ?>
-                  <option value="<?php echo htmlspecialchars($valor); ?>"
-                    <?php echo ($valor === $category) ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($nome); ?>
-                  </option>
-                <?php endforeach; ?>
+                <?php 
+                // Get all categories for the dropdown
+                $sql_all_categories = "SELECT * FROM categoria ORDER BY nome";
+                $all_categories_result = $conn->execute_query($sql_all_categories);
+                
+                if ($all_categories_result && $all_categories_result->num_rows > 0) {
+                  while ($cat = $all_categories_result->fetch_assoc()) {
+                    $selected = ($cat['id'] == $category_id) ? 'selected' : '';
+                    echo "<option value='" . htmlspecialchars($cat['id']) . "' $selected>";
+                    echo htmlspecialchars($cat['nome']);
+                    echo "</option>";
+                  }
+                  $all_categories_result->free();
+                }
+                ?>
               </select>
             </div>
 
@@ -295,6 +286,11 @@ $user_email = $_SESSION['user_email'];
       </div>
     </div>
   </div>
+
+  <?php 
+  // Close database connection
+  $db->close_connection();
+  ?>
 
   <?php include '../includes/spinner.php' ?>
   <script src="../assets/js/spinner.js"></script>

@@ -31,6 +31,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_certificate']))
 
   if (empty($categoria)) {
     $errors[] = "Selecione uma categoria.";
+  } else {
+    // Verify that the category ID exists in the database
+    $sql_check_category = "SELECT id FROM categoria WHERE id = ?";
+    $category_result = $conn->execute_query($sql_check_category, [$categoria]);
+    
+    if (!$category_result || $category_result->num_rows === 0) {
+      $errors[] = "Categoria selecionada é inválida.";
+    }
+    
+    if ($category_result) $category_result->free();
   }
 
 
@@ -77,7 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_certificate']))
         $errors[] = "Falha ao mover o arquivo para o destino. Verifique as permissões do diretório.";
       } else {
 
-        $sql = "INSERT INTO certificado (nome_do_arquivo, nome_pessoal, carga_horaria, categoria, fk_usuario_email) 
+        $sql = "INSERT INTO certificado (nome_do_arquivo, nome_pessoal, carga_horaria, fk_categoria_id, fk_usuario_email) 
                         VALUES (?, ?, ?, ?, ?)";
 
         if (!$conn->execute_query($sql, [$new_filename, $nome_pessoal, $carga_horaria, $categoria, $_SESSION['user_email']])) {

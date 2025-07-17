@@ -8,6 +8,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
   redirect_with_toast('../index.php', "Você não está logado. Faça login para deletar a conta.");
 }
 
+// Redirect coordinators to their specific dashboard
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'coordenador') {
+  header('Location: coordinator_dashboard.php');
+  exit();
+}
+
 $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 ?>
 
@@ -66,52 +72,35 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
       <?php
 
-      $categories_limit = [
-        'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
-        'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
-        'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
-        'Voluntario_em_Areas_do_Curso' => 20,
-        'Estagio_Nao_Obrigatorio' => 40,
-        'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 20,
-        'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 30,
-        'Curso_de_Formacao_na_Area_Especifica' => 40,
-        'Ouvinte_em_apresentacao_de_trabalhos' => 10,
-        'Curso_de_Linguas' => 30,
-        'Monitor_em_Areas_do_Curso' => 30,
-        'Participacoes_Artisticas_e_Institucionais' => 20,
-        'Atividades_Colegiais_Representativas' => 20
-      ];
-
-      $categories = [
-        'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
-        'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
-        'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
-        'Voluntario_em_Areas_do_Curso' => 'Voluntário em Áreas do Curso',
-        'Estagio_Nao_Obrigatorio' => 'Estágio Não Obrigatório',
-        'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 'Publicação, Apresentação e Premiação de Trabalhos',
-        'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 'Visitas e Viagens de Estudo relacionadas ao Curso',
-        'Curso_de_Formacao_na_Area_Especifica' => 'Curso de Formação na Área Específica',
-        'Ouvinte_em_apresentacao_de_trabalhos' => 'Ouvinte em Apresentação de Trabalhos',
-        'Curso_de_Linguas' => 'Curso de Línguas',
-        'Monitor_em_Areas_do_Curso' => 'Monitor em Áreas do Curso',
-        'Participacoes_Artisticas_e_Institucionais' => 'Participações Artísticas e Institucionais',
-        'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
-      ];
-
       $user_email = $_SESSION['user_email'];
 
       $db = new db_connection();
       $conn = $db->get_connection();
 
+      // Get all categories from database
+      $sql_categories = "SELECT * FROM categoria ORDER BY nome";
+      $categories_result = $conn->execute_query($sql_categories);
+      
+      $categories = [];
+      $categories_limit = []; // Default limit for each category
+      
+      if ($categories_result && $categories_result->num_rows > 0) {
+        while ($cat = $categories_result->fetch_assoc()) {
+          $categories[$cat['id']] = $cat['nome'];
+          $categories_limit[$cat['id']] = 40; // Default limit, could be made configurable later
+        }
+        $categories_result->free();
+      }
+
       $categories_sum = [];
-      foreach ($categories_limit as $cat => $limit) {
+      foreach ($categories_limit as $cat_id => $limit) {
         try {
           $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
                     WHERE fk_usuario_email = ? 
-                    AND FIND_IN_SET(?, categoria) > 0";
+                    AND fk_categoria_id = ?";
 
-          $result = $conn->execute_query($sql, [$user_email, $cat]);
+          $result = $conn->execute_query($sql, [$user_email, $cat_id]);
           $row = $result->fetch_assoc();
 
           $sum = (float)($row['total'] ?? 0);
@@ -120,14 +109,14 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
             $sum = $limit;
           }
 
-          $categories_sum[$cat] = $sum;
+          $categories_sum[$cat_id] = $sum;
         } catch (Exception $e) {
-          $categories_sum[$cat] = 0;
+          $categories_sum[$cat_id] = 0;
         }
       }
 
-      foreach ($categories_limit as $cat => $limit) {
-        $sum = $categories_sum[$cat];
+      foreach ($categories_limit as $cat_id => $limit) {
+        $sum = $categories_sum[$cat_id];
         $percentage = ($limit > 0) ? floor(($sum / $limit) * 100) : 0;
         if ($percentage > 100) {
           $percentage = 100;
@@ -146,10 +135,10 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
         echo "
         <div class='col align-items-stretch'>
-          <a href='category.php?category=" . urlencode($cat) . "' class='text-decoration-none'>
+          <a href='category.php?category=" . urlencode($cat_id) . "' class='text-decoration-none'>
             <div class='card text-center shadow-lg h-100'>
               <div class='card-body'>
-                <h6 class='card-title fw-bold mb-3'>{$categories[$cat]}</h6>
+                <h6 class='card-title fw-bold mb-3'>{$categories[$cat_id]}</h6>
                 <div class='position-relative mb-2'>
                   <div class='fw-bold mb-1'>{$sum}/{$limit}h</div>
                   <div class='progress'>
@@ -218,8 +207,8 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option selected disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach ($categories as $valor => $nome): ?>
-                  <option value="<?php echo htmlspecialchars($valor); ?>">
+                <?php foreach ($categories as $cat_id => $nome): ?>
+                  <option value="<?php echo htmlspecialchars($cat_id); ?>">
                     <?php echo htmlspecialchars($nome); ?>
                   </option>
                 <?php endforeach; ?>

@@ -1,6 +1,9 @@
 <?php
 require_once '../includes/session_start.php';
 require_once '../includes/toast.php';
+
+// Redirect users away from public registration
+redirect_with_toast('../pages/login.php', 'O cadastro de alunos agora é feito apenas por coordenadores. Faça login se você já possui uma conta.');
 ?>
 
 <!doctype html>
