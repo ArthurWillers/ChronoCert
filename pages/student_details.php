@@ -147,29 +147,11 @@ if ($total_result && $total_result->num_rows > 0) {
                     </tr>
                   </thead>
                   <tbody>
-                    <?php 
-                    $certificates = [];
-                    if ($certificates_result) {
-                      while ($cert = $certificates_result->fetch_assoc()) {
-                        $certificates[] = $cert;
-                      }
-                    }
-                    
-                    usort($certificates, function($a, $b) {
-                      if ($a['status'] === 'não_verificado' && $b['status'] !== 'não_verificado') return -1;
-                      if ($a['status'] !== 'não_verificado' && $b['status'] === 'não_verificado') return 1;
-                      return 0;
-                    });
-                    
-                    foreach ($certificates as $certificate):
+                    <?php while ($certificate = $certificates_result->fetch_assoc()): 
                       $sql_cat = "SELECT nome FROM categoria WHERE id = ?";
                       $cat_result = $conn->execute_query($sql_cat, [$certificate['fk_categoria_id']]);
-                      $categoria_nome = '';
-                      if ($cat_result && $cat_result->num_rows > 0) {
-                        $cat_data = $cat_result->fetch_assoc();
-                        $categoria_nome = $cat_data['nome'];
-                        $cat_result->free();
-                      }
+                      $categoria_nome = $cat_result->fetch_assoc()['nome'] ?? '';
+                      $cat_result->free();
                       
                       $status_color = $certificate['status'] === 'válido' ? 'success' : ($certificate['status'] === 'incerto' ? 'warning' : 'danger');
                       $status_text = ucfirst(str_replace('_', ' ', $certificate['status']));
@@ -191,7 +173,7 @@ if ($total_result && $total_result->num_rows > 0) {
                           </div>
                         </td>
                       </tr>
-                    <?php endforeach; ?>
+                    <?php endwhile; ?>
                   </tbody>
                 </table>
               </div>
