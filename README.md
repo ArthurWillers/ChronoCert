@@ -118,7 +118,7 @@ sudo chcon -R -t httpd_sys_rw_content_t /var/www/html/ChronoCert/private/tmp
 
 ### 8. Criação de usuário coordenador
 
-Para criar um usuário coordenador, faça uma inserção na tabela `usuario` do banco de dados, e, no campo senha, ponha o resultado do seguinte comando, substituindo `[SENHA]` pela senha desejada.:
+Para criar um usuário coordenador, faça uma inserção na tabela `usuario` do banco de dados, e, no campo senha, ponha o resultado do seguinte comando, substituindo `[SENHA]` pela senha desejada:
 
 ```
 php private/config/senha-coordenador.php [SENHA]
