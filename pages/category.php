@@ -169,11 +169,10 @@ if ($user_course_result) $user_course_result->free();
     <div class="row">
       <?php
 
-      $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria 
+      $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria, status 
               FROM certificado 
               WHERE fk_usuario_email = ? 
-              AND fk_categoria_id = ?
-              ORDER BY nome_pessoal";
+              AND fk_categoria_id = ?";
 
       try {
         $result = $conn->execute_query($sql, [$user_email, $category_id]);
@@ -183,6 +182,8 @@ if ($user_course_result) $user_course_result->free();
             $file_name = htmlspecialchars($cert['nome_do_arquivo']);
             $display_name = htmlspecialchars($cert['nome_pessoal']);
             $hours = number_format($cert['carga_horaria'], 1);
+            $status_color = $cert['status'] === 'válido' ? 'success' : ($cert['status'] === 'incerto' ? 'warning' : 'danger');
+            $status_text = ucfirst(str_replace('_', ' ', $cert['status']));
 
             echo "
             <div class='col-md-6 col-lg-4 col-xl-3 mb-4'>
@@ -190,6 +191,7 @@ if ($user_course_result) $user_course_result->free();
                 <div class='card-body text-center'>
                   <h5 class='card-title text-truncate' title='$display_name'>$display_name</h5>
                   <p class='card-text mb-2'>Carga horária: $hours h</p>
+                  <p class='card-text mb-2'><span class='badge bg-$status_color'>$status_text</span></p>
                   <div class='row g-2'>
                     <div class='col-6'>
                       <a href='../actions/download_certificate.php?filename=$file_name' class='btn btn-sm btn-primary w-100'>

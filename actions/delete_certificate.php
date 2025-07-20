@@ -27,8 +27,8 @@ $conn = $db->get_connection();
 
 try {
 
-  $check_sql = "SELECT * FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
-  $check_result = $conn->execute_query($check_sql, [$file_name, $user_email]);
+  $check_sql = "SELECT * FROM certificado WHERE nome_do_arquivo = ?";
+  $check_result = $conn->execute_query($check_sql, [$file_name]);
 
   if ($check_result->num_rows === 0) {
     redirect_with_toast($redirect_url, "Certificado não encontrado ou não pertence a você.");
@@ -36,8 +36,8 @@ try {
   }
 
 
-  $delete_sql = "DELETE FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
-  $delete_result = $conn->execute_query($delete_sql, [$file_name, $user_email]);
+  $delete_sql = "DELETE FROM certificado WHERE nome_do_arquivo = ?";
+  $delete_result = $conn->execute_query($delete_sql, [$file_name]);
 
   if ($conn->affected_rows > 0) {
 

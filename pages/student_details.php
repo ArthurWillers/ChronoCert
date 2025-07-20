@@ -35,28 +35,11 @@ $student = $student_result->fetch_assoc();
 $student_result->free();
 
 // Get student certificates with category names
-$sql_certificates = "SELECT 
-    c.nome_do_arquivo,
-    c.nome_pessoal,
-    c.carga_horaria,
-    cat.nome as categoria_nome
-FROM certificado c
-JOIN categoria cat ON c.fk_categoria_id = cat.id
-WHERE c.fk_usuario_email = ?
-ORDER BY c.nome_pessoal";
+$sql_certificates = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria, status, fk_categoria_id FROM certificado WHERE fk_usuario_email = ?";
 
 $certificates_result = $conn->execute_query($sql_certificates, [$student_email]);
 
-// Get total hours by category
-$sql_hours_by_category = "SELECT 
-    cat.nome as categoria_nome,
-    SUM(c.carga_horaria) as total_horas
-FROM certificado c
-JOIN categoria cat ON c.fk_categoria_id = cat.id
-WHERE c.fk_usuario_email = ?
-GROUP BY cat.id, cat.nome
-ORDER BY total_horas DESC";
-
+$sql_hours_by_category = "SELECT fk_categoria_id, SUM(carga_horaria) as total_horas FROM certificado WHERE fk_usuario_email = ?";
 $hours_by_category_result = $conn->execute_query($sql_hours_by_category, [$student_email]);
 
 // Get total hours
@@ -158,24 +141,57 @@ if ($total_result && $total_result->num_rows > 0) {
                       <th>Nome do Arquivo</th>
                       <th>Nome Pessoal</th>
                       <th>Categoria</th>
+                      <th>Status</th>
                       <th>Carga Horária</th>
                       <th>Ações</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <?php while ($certificate = $certificates_result->fetch_assoc()): ?>
+                    <?php 
+                    $certificates = [];
+                    if ($certificates_result) {
+                      while ($cert = $certificates_result->fetch_assoc()) {
+                        $certificates[] = $cert;
+                      }
+                    }
+                    
+                    usort($certificates, function($a, $b) {
+                      if ($a['status'] === 'não_verificado' && $b['status'] !== 'não_verificado') return -1;
+                      if ($a['status'] !== 'não_verificado' && $b['status'] === 'não_verificado') return 1;
+                      return 0;
+                    });
+                    
+                    foreach ($certificates as $certificate):
+                      $sql_cat = "SELECT nome FROM categoria WHERE id = ?";
+                      $cat_result = $conn->execute_query($sql_cat, [$certificate['fk_categoria_id']]);
+                      $categoria_nome = '';
+                      if ($cat_result && $cat_result->num_rows > 0) {
+                        $cat_data = $cat_result->fetch_assoc();
+                        $categoria_nome = $cat_data['nome'];
+                        $cat_result->free();
+                      }
+                      
+                      $status_color = $certificate['status'] === 'válido' ? 'success' : ($certificate['status'] === 'incerto' ? 'warning' : 'danger');
+                      $status_text = ucfirst(str_replace('_', ' ', $certificate['status']));
+                    ?>
                       <tr>
                         <td><?= htmlspecialchars($certificate['nome_do_arquivo']) ?></td>
                         <td><?= htmlspecialchars($certificate['nome_pessoal']) ?></td>
-                        <td><span class="badge bg-info"><?= htmlspecialchars(str_replace('_', ' ', $certificate['categoria_nome'])) ?></span></td>
+                        <td><span class="badge bg-info"><?= htmlspecialchars(str_replace('_', ' ', $categoria_nome)) ?></span></td>
+                        <td><span class="badge bg-<?= $status_color ?>"><?= $status_text ?></span></td>
                         <td><?= number_format($certificate['carga_horaria'], 1) ?> horas</td>
                         <td>
                           <a href="../actions/download_certificate.php?filename=<?= urlencode($certificate['nome_do_arquivo']) ?>" class="btn btn-sm btn-primary">
-                            <i class="bi bi-download"></i> Download
+                            <i class="bi bi-download"></i>
                           </a>
+                          <div class="btn-group btn-group-sm">
+                            <button class="btn btn-success" onclick="updateStatus('<?= $certificate['nome_do_arquivo'] ?>', 'válido')" title="Válido">V</button>
+                            <button class="btn btn-warning" onclick="updateStatus('<?= $certificate['nome_do_arquivo'] ?>', 'incerto')" title="Incerto">I</button>
+                            <button class="btn btn-danger" onclick="deleteCertificate('<?= $certificate['nome_do_arquivo'] ?>')" title="Remover">R</button>
+                          </div>
                         </td>
                       </tr>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
                   </tbody>
                 </table>
               </div>
@@ -195,6 +211,35 @@ if ($total_result && $total_result->num_rows > 0) {
   <script src="../assets/js/spinner.js"></script>
   <?php require_once '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
+
+  <script>
+    function updateStatus(filename, status) {
+      fetch('../actions/update_certificate_status.php', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'filename=' + encodeURIComponent(filename) + '&status=' + status
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          location.reload();
+        } else {
+          alert('Erro ao atualizar status');
+        }
+      });
+    }
+
+    function deleteCertificate(filename) {
+      if (confirm('Tem certeza que deseja remover este certificado?')) {
+        fetch('../actions/delete_certificate.php', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+          body: 'file_name=' + encodeURIComponent(filename)
+        })
+        .then(() => location.reload());
+      }
+    }
+  </script>
 
 </body>
 </html>
