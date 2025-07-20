@@ -18,8 +18,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     $email = $_POST['email'] ?? '';
     $password_register = $_POST['password_register'] ?? '';
     $confirm_password_register = $_POST['confirm_password_register'] ?? '';
+    $curso_id = $_POST['curso_id'] ?? '';
 
-    if (empty($username_register) || empty($email) || empty($password_register) || empty($confirm_password_register)) {
+    if (empty($username_register) || empty($email) || empty($password_register) || empty($confirm_password_register) || empty($curso_id)) {
         redirect_with_toast('../pages/coordinator_dashboard.php', 'Todos os campos devem ser preenchidos');
     }
 
@@ -49,9 +50,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     // Hash the password
     $hashed_password = password_hash($password_register, PASSWORD_DEFAULT);
 
-    // Insert new student (tipo_de_conta defaults to 'aluno')
-    $sql_insert = "INSERT INTO usuario (email, nome_de_usuario, senha, tipo_de_conta) VALUES (?, ?, ?, 'aluno')";
-    $result_insert = $conn->execute_query($sql_insert, [$email, $username_register, $hashed_password]);
+    // Insert new student
+    $sql_insert = "INSERT INTO usuario (email, nome_de_usuario, senha, tipo_de_conta, fk_curso_id) VALUES (?, ?, ?, 'aluno', ?)";
+    $result_insert = $conn->execute_query($sql_insert, [$email, $username_register, $hashed_password, $curso_id]);
 
     $db->close_connection();
 

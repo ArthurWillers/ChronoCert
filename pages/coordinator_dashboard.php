@@ -14,25 +14,35 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'coordenador') 
 
 $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
-// Get all students with their total hours
 $db = new db_connection();
 $conn = $db->get_connection();
 
+$coordinator_email = $_SESSION['user_email'];
+$sql_coordinator = "SELECT fk_curso_id FROM usuario WHERE email = ?";
+$coordinator_result = $conn->execute_query($sql_coordinator, [$coordinator_email]);
+$coordinator_course_id = null;
+
+if ($coordinator_result && $coordinator_result->num_rows > 0) {
+    $coordinator_data = $coordinator_result->fetch_assoc();
+    $coordinator_course_id = $coordinator_data['fk_curso_id'];
+}
+
+if ($coordinator_result) $coordinator_result->free();
+
 $sql_students = "SELECT 
-    u.email, 
-    u.nome_de_usuario,
-    COALESCE(SUM(c.carga_horaria), 0) as total_horas
-FROM usuario u 
-LEFT JOIN certificado c ON u.email = c.fk_usuario_email 
-WHERE u.tipo_de_conta = 'aluno'
-GROUP BY u.email, u.nome_de_usuario
-ORDER BY u.nome_de_usuario";
+    nome_de_usuario,
+    email,
+    (SELECT COALESCE(SUM(carga_horaria), 0) 
+     FROM certificado 
+     WHERE fk_usuario_email = usuario.email) AS total_horas
+FROM usuario
+WHERE tipo_de_conta = 'aluno' AND fk_curso_id = ?
+ORDER BY nome_de_usuario";
 
-$students_result = $conn->execute_query($sql_students);
+$students_result = $conn->execute_query($sql_students, [$coordinator_course_id]);
 
-// Get all categories
-$sql_categories = "SELECT * FROM categoria ORDER BY nome";
-$categories_result = $conn->execute_query($sql_categories);
+$sql_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
+$categories_result = $conn->execute_query($sql_categories, [$coordinator_course_id]);
 ?>
 
 <!doctype html>
@@ -144,6 +154,7 @@ $categories_result = $conn->execute_query($sql_categories);
               <label for="email" class="form-label">Email</label>
               <input type="email" name="email" class="form-control" placeholder="Digite o email" maxlength="255" required>
             </div>
+            <input type="hidden" name="curso_id" value="<?= $coordinator_course_id ?>">
             <div class="mb-3">
               <label for="password_register" class="form-label">Senha</label>
               <div class="input-group">
