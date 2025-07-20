@@ -77,23 +77,32 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       $db = new db_connection();
       $conn = $db->get_connection();
 
-      // Get all categories from database
-      $sql_categories = "SELECT * FROM categoria ORDER BY nome";
-      $categories_result = $conn->execute_query($sql_categories);
+      $sql_user_course = "SELECT fk_curso_id FROM usuario WHERE email = ?";
+      $user_course_result = $conn->execute_query($sql_user_course, [$user_email]);
+      $user_course_id = null;
+
+      if ($user_course_result && $user_course_result->num_rows > 0) {
+        $user_data = $user_course_result->fetch_assoc();
+        $user_course_id = $user_data['fk_curso_id'];
+      }
+
+      if ($user_course_result) $user_course_result->free();
+
+      $sql_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
+      $categories_result = $conn->execute_query($sql_categories, [$user_course_id]);
       
       $categories = [];
-      $categories_limit = []; // Default limit for each category
       
       if ($categories_result && $categories_result->num_rows > 0) {
         while ($cat = $categories_result->fetch_assoc()) {
           $categories[$cat['id']] = $cat['nome'];
-          $categories_limit[$cat['id']] = 40; // Default limit, could be made configurable later
         }
         $categories_result->free();
       }
 
       $categories_sum = [];
-      foreach ($categories_limit as $cat_id => $limit) {
+      foreach ($categories as $cat_id => $cat_name) {
+        $limit = 40;
         try {
           $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
@@ -115,7 +124,8 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
         }
       }
 
-      foreach ($categories_limit as $cat_id => $limit) {
+      foreach ($categories as $cat_id => $cat_name) {
+        $limit = 40;
         $sum = $categories_sum[$cat_id];
         $percentage = ($limit > 0) ? floor(($sum / $limit) * 100) : 0;
         if ($percentage > 100) {
