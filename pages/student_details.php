@@ -133,7 +133,7 @@ if ($total_result && $total_result->num_rows > 0) {
                 <tbody>
                   <?php while ($category_hours = $hours_by_category_result->fetch_assoc()): ?>
                     <tr>
-                      <td><?= htmlspecialchars($category_hours['categoria_nome']) ?></td>
+                      <td><?= htmlspecialchars(str_replace('_', ' ', $category_hours['categoria_nome'])) ?></td>
                       <td><?= number_format($category_hours['total_horas'], 1) ?> horas</td>
                     </tr>
                   <?php endwhile; ?>
@@ -167,7 +167,7 @@ if ($total_result && $total_result->num_rows > 0) {
                       <tr>
                         <td><?= htmlspecialchars($certificate['nome_do_arquivo']) ?></td>
                         <td><?= htmlspecialchars($certificate['nome_pessoal']) ?></td>
-                        <td><span class="badge bg-info"><?= htmlspecialchars($certificate['categoria_nome']) ?></span></td>
+                        <td><span class="badge bg-info"><?= htmlspecialchars(str_replace('_', ' ', $certificate['categoria_nome'])) ?></span></td>
                         <td><?= number_format($certificate['carga_horaria'], 1) ?> horas</td>
                         <td>
                           <a href="../actions/download_certificate.php?filename=<?= urlencode($certificate['nome_do_arquivo']) ?>" class="btn btn-sm btn-primary">
