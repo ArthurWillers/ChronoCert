@@ -76,8 +76,8 @@ CREATE TABLE `certificado` (
   `nome_pessoal` varchar(255) NOT NULL,
   `carga_horaria` float NOT NULL,
   `fk_usuario_email` varchar(256) NOT NULL,
-  `fk_categoria_id` int(11) NOT NULL
-  `status` enum('nao_verificado','valido', 'incerto', 'invalido') NOT NULL DEFAULT 'nao_verificado',
+  `fk_categoria_id` int(11) NOT NULL,
+  `status` enum('nao_verificado','valido', 'incerto', 'invalido') NOT NULL DEFAULT 'nao_verificado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Estrutura para tabela `codigo_de_verificacao`
