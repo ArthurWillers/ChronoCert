@@ -116,6 +116,14 @@ sudo chcon -R -t httpd_sys_rw_content_t /var/www/html/ChronoCert/private/uploads
 sudo chcon -R -t httpd_sys_rw_content_t /var/www/html/ChronoCert/private/tmp
 ```
 
+### 8. Criação de usuário coordenador
+
+Para criar um usuário coordenador, faça uma inserção na tabela `usuario` do banco de dados, e, no campo senha, ponha o resultado do seguinte comando, substituindo `[SENHA]` pela senha desejada.:
+
+```
+php private/config/senha-coordenador.php [SENHA]
+```
+
 ## Configuração de Email
 
 Para o sistema de recuperação de senha funcionar, configure um provedor SMTP:
@@ -130,7 +138,7 @@ Consulte a documentação do seu provedor SMTP para configurações específicas
 
 ## Categorias de Certificados
 
-O sistema suporta 13 categorias específicas do curso, com limites de carga horária conforme diretrizes acadêmicas:
+O sistema, por padrão, tem 13 categorias em 4 cursos com limites de carga horária conforme diretrizes acadêmicas:
 
 1. **Bolsa, Projetos de Ensino e Extensões** (40h)
 2. **Ouvinte em Eventos relacionados ao Curso** (60h)
