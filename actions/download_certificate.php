@@ -19,8 +19,14 @@ $upload_dir = __DIR__ . '/../private/uploads/';
 
 $db = new db_connection();
 $conn = $db->get_connection();
-$sql = "SELECT nome_do_arquivo, nome_pessoal, fk_categoria_id FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
-$result = $conn->execute_query($sql, [$filename, $_SESSION['user_email']]);
+
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'coordenador') {
+  $sql = "SELECT c.nome_do_arquivo, c.nome_pessoal, c.fk_categoria_id, c.fk_usuario_email, u.nome_de_usuario as student_name FROM certificado c JOIN usuario u ON c.fk_usuario_email = u.email WHERE c.nome_do_arquivo = ?";
+  $result = $conn->execute_query($sql, [$filename]);
+} else {
+  $sql = "SELECT nome_do_arquivo, nome_pessoal, fk_categoria_id FROM certificado WHERE nome_do_arquivo = ? AND fk_usuario_email = ?";
+  $result = $conn->execute_query($sql, [$filename, $_SESSION['user_email']]);
+}
 
 if (!$result || $result->num_rows == 0) {
   $db->close_connection();
@@ -46,7 +52,13 @@ if (!file_exists($file_path)) {
 
 $base_name = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $file['nome_pessoal']);
 $category_name = str_replace('_', ' ', $category['nome']);
-$internal_name = $base_name . " - " . $category_name . ".pdf";
+
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'coordenador' && isset($file['student_name'])) {
+  $student_name = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $file['student_name']);
+  $internal_name = $student_name . " - " . $base_name . " - " . $category_name . ".pdf";
+} else {
+  $internal_name = $base_name . " - " . $category_name . ".pdf";
+}
 
 header('Content-Type: application/pdf');
 header('Content-Disposition: attachment; filename="' . $internal_name . '"');

@@ -170,7 +170,7 @@ if ($total_result && $total_result->num_rows > 0) {
                         <td><span class="badge bg-info"><?= htmlspecialchars($certificate['categoria_nome']) ?></span></td>
                         <td><?= number_format($certificate['carga_horaria'], 1) ?> horas</td>
                         <td>
-                          <a href="../actions/download_certificate.php?file=<?= urlencode($certificate['nome_do_arquivo']) ?>" class="btn btn-sm btn-primary">
+                          <a href="../actions/download_certificate.php?filename=<?= urlencode($certificate['nome_do_arquivo']) ?>" class="btn btn-sm btn-primary">
                             <i class="bi bi-download"></i> Download
                           </a>
                         </td>
