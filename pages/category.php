@@ -36,9 +36,20 @@ $category_data = $category_result->fetch_assoc();
 $category_result->free();
 
 $category_name = $category_data['nome'];
-$category_limit = 40; // Default limit, could be made configurable later
+$category_limit = 40;
 
 $user_email = $_SESSION['user_email'];
+
+$sql_user_course = "SELECT fk_curso_id FROM usuario WHERE email = ?";
+$user_course_result = $conn->execute_query($sql_user_course, [$user_email]);
+$user_course_id = null;
+
+if ($user_course_result && $user_course_result->num_rows > 0) {
+  $user_data = $user_course_result->fetch_assoc();
+  $user_course_id = $user_data['fk_curso_id'];
+}
+
+if ($user_course_result) $user_course_result->free();
 ?>
 
 <!doctype html>
@@ -255,9 +266,8 @@ $user_email = $_SESSION['user_email'];
               <select name="categoria" class="form-select" required>
                 <option disabled value="">Selecione a categoria do certificado</option>
                 <?php 
-                // Get all categories for the dropdown
-                $sql_all_categories = "SELECT * FROM categoria ORDER BY nome";
-                $all_categories_result = $conn->execute_query($sql_all_categories);
+                $sql_all_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
+                $all_categories_result = $conn->execute_query($sql_all_categories, [$user_course_id]);
                 
                 if ($all_categories_result && $all_categories_result->num_rows > 0) {
                   while ($cat = $all_categories_result->fetch_assoc()) {
