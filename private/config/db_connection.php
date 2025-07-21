@@ -17,6 +17,7 @@ class db_connection {
         if ($this->conn->connect_error) {
             die("Connection failed: " . $this->conn->connect_error);
         }
+        $this->conn->set_charset("utf8mb4");
         return $this->conn;
     }
 

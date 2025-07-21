@@ -75,7 +75,7 @@ CREATE TABLE `certificado` (
   `nome_do_arquivo` varchar(255) NOT NULL,
   `nome_pessoal` varchar(255) NOT NULL,
   `carga_horaria` float NOT NULL,
-  `fk_usuario_email` varchar(256) NOT NULL,
+  `fk_usuario_email` varchar(255) NOT NULL,
   `fk_categoria_id` int(11) NOT NULL,
   `status` enum('não_verificado','válido', 'incerto') NOT NULL DEFAULT 'não_verificado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
