@@ -47,13 +47,17 @@ $sql_hours_by_category = "SELECT c.fk_categoria_id, cat.nome as categoria_nome, 
                           GROUP BY c.fk_categoria_id, cat.nome";
 $hours_by_category_result = $conn->execute_query($sql_hours_by_category, [$student_email]);
 
-// Get total hours
-$sql_total = "SELECT SUM(carga_horaria) as total_horas FROM certificado WHERE fk_usuario_email = ? AND status = 'válido'";
-$total_result = $conn->execute_query($sql_total, [$student_email]);
+// Get total hours and max possible hours
+$sql_total = "SELECT 
+  (SELECT SUM(carga_horaria) FROM certificado WHERE fk_usuario_email = ? AND status = 'válido') as total_horas,
+  (SELECT SUM(carga_maxima) FROM categoria WHERE fk_curso_id = (SELECT fk_curso_id FROM usuario WHERE email = ?)) as total_horas_maximas";
+$total_result = $conn->execute_query($sql_total, [$student_email, $student_email]);
 $total_hours = 0;
+$total_max_hours = 0;
 if ($total_result && $total_result->num_rows > 0) {
   $total_row = $total_result->fetch_assoc();
   $total_hours = $total_row['total_horas'] ?? 0;
+  $total_max_hours = $total_row['total_horas_maximas'] ?? 0;
   $total_result->free();
 }
 ?>
@@ -98,7 +102,7 @@ if ($total_result && $total_result->num_rows > 0) {
           </h2>
           <span class="badge bg-primary fs-5 px-3 py-2">
             <i class="bi bi-clock me-1"></i>
-            <?= number_format($total_hours, 1) ?> horas totais
+            <?= number_format($total_hours, 1) ?>/<?= number_format($total_max_hours, 1) ?> horas
           </span>
         </div>
       </div>
@@ -133,7 +137,7 @@ if ($total_result && $total_result->num_rows > 0) {
                 <i class="bi bi-clock text-success me-3"></i>
                 <div>
                   <strong>Total de Horas:</strong><br>
-                  <span class="badge bg-success fs-6"><?= number_format($total_hours, 1) ?> horas</span>
+                  <span class="badge bg-success fs-6"><?= number_format($total_hours, 1) ?>/<?= number_format($total_max_hours, 1) ?> horas</span>
                 </div>
               </div>
               <div class="list-group-item d-flex align-items-center px-0">

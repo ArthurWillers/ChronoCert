@@ -91,17 +91,19 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       $categories_result = $conn->execute_query($sql_categories, [$user_course_id]);
 
       $categories = [];
+      $categories_limits = [];
 
       if ($categories_result && $categories_result->num_rows > 0) {
         while ($cat = $categories_result->fetch_assoc()) {
           $categories[$cat['id']] = $cat['nome'];
+          $categories_limits[$cat['id']] = (float)$cat['carga_maxima'];
         }
         $categories_result->free();
       }
 
       $categories_sum = [];
       foreach ($categories as $cat_id => $cat_name) {
-        $limit = 40;
+        $limit = $categories_limits[$cat_id];
         try {
           $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
@@ -125,7 +127,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
       }
 
       foreach ($categories as $cat_id => $cat_name) {
-        $limit = 40;
+        $limit = $categories_limits[$cat_id];
         $sum = $categories_sum[$cat_id];
         $percentage = ($limit > 0) ? floor(($sum / $limit) * 100) : 0;
         if ($percentage > 100) {

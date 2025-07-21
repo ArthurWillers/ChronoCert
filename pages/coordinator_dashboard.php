@@ -35,12 +35,15 @@ $sql_students = "SELECT
     (SELECT COALESCE(SUM(carga_horaria), 0) 
      FROM certificado 
      WHERE fk_usuario_email = usuario.email 
-     AND status = 'válido') AS total_horas
+     AND status = 'válido') AS total_horas,
+    (SELECT COALESCE(SUM(carga_maxima), 0)
+     FROM categoria
+     WHERE fk_curso_id = ?) AS total_horas_maximas
 FROM usuario
 WHERE tipo_de_conta = 'aluno' AND fk_curso_id = ?
 ORDER BY nome_de_usuario";
 
-$students_result = $conn->execute_query($sql_students, [$coordinator_course_id]);
+$students_result = $conn->execute_query($sql_students, [$coordinator_course_id, $coordinator_course_id]);
 
 $sql_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
 $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_id]);

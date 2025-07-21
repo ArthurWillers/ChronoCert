@@ -36,7 +36,7 @@ $category_data = $category_result->fetch_assoc();
 $category_result->free();
 
 $category_name = $category_data['nome'];
-$category_limit = 40;
+$category_limit = (float)$category_data['carga_maxima'];
 
 $user_email = $_SESSION['user_email'];
 
