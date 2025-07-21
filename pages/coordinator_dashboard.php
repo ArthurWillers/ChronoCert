@@ -38,7 +38,11 @@ $sql_students = "SELECT
      AND status = 'válido') AS total_horas,
     (SELECT COALESCE(SUM(carga_maxima), 0)
      FROM categoria
-     WHERE fk_curso_id = ?) AS total_horas_maximas
+     WHERE fk_curso_id = ?) AS total_horas_maximas,
+    (SELECT COUNT(*) 
+     FROM certificado 
+     WHERE fk_usuario_email = usuario.email 
+     AND status = 'não_verificado') AS certificados_pendentes
 FROM usuario
 WHERE tipo_de_conta = 'aluno' AND fk_curso_id = ?
 ORDER BY nome_de_usuario";
@@ -190,6 +194,9 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                       <i class="bi bi-clock me-1"></i>Total de Horas
                     </th>
                     <th class="border-0 text-primary fw-semibold text-center">
+                      <i class="bi bi-clipboard-check me-1"></i>Status
+                    </th>
+                    <th class="border-0 text-primary fw-semibold text-center">
                       <i class="bi bi-gear me-1"></i>Ações
                     </th>
                   </tr>
@@ -216,6 +223,19 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                           </span>
                         </td>
                         <td class="align-middle text-center">
+                          <?php if ($student['certificados_pendentes'] > 0): ?>
+                            <span class="badge bg-warning text-dark fs-6 px-3 py-2" title="<?= $student['certificados_pendentes'] ?> certificado(s) aguardando verificação">
+                              <i class="bi bi-exclamation-triangle me-1"></i>
+                              <?= $student['certificados_pendentes'] ?> pendente<?= $student['certificados_pendentes'] > 1 ? 's' : '' ?>
+                            </span>
+                          <?php else: ?>
+                            <span class="badge bg-light text-muted fs-6 px-3 py-2" title="Nenhum certificado aguardando verificação">
+                              <i class="bi bi-dash-circle me-1"></i>
+                              Nada pendente
+                            </span>
+                          <?php endif; ?>
+                        </td>
+                        <td class="align-middle text-center">
                           <div class="btn-group" role="group">
                             <a href="student_details.php?email=<?= urlencode($student['email']) ?>"
                               class="btn btn-sm btn-outline-primary spinner-trigger" title="Ver Detalhes">
@@ -232,7 +252,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                     <?php endwhile; ?>
                   <?php else: ?>
                     <tr>
-                      <td colspan="4" class="text-center py-5">
+                      <td colspan="5" class="text-center py-5">
                         <div class="text-muted">
                           <i class="bi bi-inbox display-4 d-block mb-3 opacity-50"></i>
                           <h5>Nenhum aluno cadastrado</h5>
