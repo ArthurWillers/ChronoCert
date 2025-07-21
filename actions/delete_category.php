@@ -1,9 +1,16 @@
 <?php
+/**
+ * Excluir Categoria
+ * 
+ * Processa a exclusão de categorias de certificados.
+ * Apenas coordenadores podem excluir categorias.
+ * Impede a exclusão de categorias com certificados associados.
+ */
+
 require_once '../includes/session_start.php';
 require_once '../includes/toast.php';
 require_once '../private/config/db_connection.php';
 
-// Check if user is logged in and is a coordinator
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     redirect_with_toast('../index.php', 'Você não está logado.');
 }
@@ -21,7 +28,7 @@ if (empty($category_id)) {
 $db = new db_connection();
 $conn = $db->get_connection();
 
-// Check if category has certificates associated
+// Verifica se existem certificados associados à categoria
 $sql_check = "SELECT COUNT(*) as count FROM certificado WHERE fk_categoria_id = ?";
 $result_check = $conn->execute_query($sql_check, [$category_id]);
 
@@ -30,13 +37,13 @@ if ($result_check) {
     $count = $row['count'];
     $result_check->free();
     
+    // Impede a exclusão se houver certificados associados
     if ($count > 0) {
         $db->close_connection();
-        redirect_with_toast('../pages/coordinator_dashboard.php', 'Não é possível excluir esta categoria pois existem certificados associados a ela');
+        redirect_with_toast('../pages/coordinator_dashboard.php', 'Impossível excluir a categoria porque há certificados associados a ela.');
     }
 }
 
-// Delete category
 $sql_delete = "DELETE FROM categoria WHERE id = ?";
 $result_delete = $conn->execute_query($sql_delete, [$category_id]);
 

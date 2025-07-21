@@ -269,7 +269,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
 
   <script>
     function deleteStudent(email) {
-      if (confirm('Tem certeza que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
+      if (confirm('Tem certeza de que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
         window.location.href = '../actions/delete_student.php?email=' + encodeURIComponent(email);
       }
     }
@@ -327,7 +327,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
     }
 
     function deleteCategory(id) {
-      if (confirm('Tem certeza que deseja excluir esta categoria? Esta ação não pode ser desfeita.')) {
+      if (confirm('Tem certeza de que deseja excluir esta categoria? Esta ação não pode ser desfeita.')) {
         window.location.href = '../actions/delete_category.php?id=' + id;
       }
     }

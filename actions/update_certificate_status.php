@@ -1,4 +1,11 @@
 <?php
+/**
+ * Atualizar Status do Certificado
+ * 
+ * Permite que coordenadores alterem o status de verificação dos certificados.
+ * Aceita três possibilidades: não_verificado, válido ou incerto.
+ */
+
 require_once '../includes/session_start.php';
 require_once '../private/config/db_connection.php';
 
@@ -7,6 +14,7 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     exit();
 }
 
+// Apenas coordenadores podem alterar status
 if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'coordenador') {
     echo json_encode(['success' => false, 'message' => 'Acesso negado']);
     exit();
@@ -20,6 +28,7 @@ if (empty($filename) || empty($status)) {
     exit();
 }
 
+// Valida se o status é um dos valores permitidos
 if (!in_array($status, ['não_verificado', 'válido', 'incerto'])) {
     echo json_encode(['success' => false, 'message' => 'Status inválido']);
     exit();

@@ -1,4 +1,11 @@
 <?php
+/**
+ * Excluir Aluno
+ * 
+ * Processa a exclusão de contas de alunos do sistema.
+ * Apenas coordenadores podem excluir alunos.
+ */
+
 require_once '../includes/session_start.php';
 require_once '../includes/toast.php';
 require_once '../private/config/db_connection.php';
@@ -20,7 +27,7 @@ if (empty($student_email)) {
 $db = new db_connection();
 $conn = $db->get_connection();
 
-// Tipo de usuário
+// Verifica se o usuário existe e é um aluno
 $sql_check = "SELECT tipo_de_conta FROM usuario WHERE email = ?";
 $result_check = $conn->execute_query($sql_check, [$student_email]);
 
@@ -28,6 +35,7 @@ if ($result_check && $result_check->num_rows > 0) {
     $user_data = $result_check->fetch_assoc();
     $result_check->free();
     
+    // Impede a exclusão se não for aluno
     if ($user_data['tipo_de_conta'] !== 'aluno') {
         $db->close_connection();
         redirect_with_toast('../pages/coordinator_dashboard.php', 'Não é possível excluir este usuário pois não é um aluno');

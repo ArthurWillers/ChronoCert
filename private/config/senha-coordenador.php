@@ -1,4 +1,9 @@
 <?php
+/**
+ * Hash para Senha de Coordenador
+ * Uso via linha de comando: php private/config/senha-coordenador.php [SENHA]
+ */
+
 if ($argc > 1 && isset($argv[1])) {
     $password = $argv[1];
     $hash = password_hash($password, PASSWORD_DEFAULT);

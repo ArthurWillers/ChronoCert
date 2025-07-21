@@ -1,9 +1,16 @@
 <?php
+/**
+ * Cadastrar Aluno
+ * 
+ * Processa o cadastro de novos alunos no sistema.
+ * Apenas coordenadores podem cadastrar alunos.
+ */
+
 require_once '../includes/session_start.php';
 require_once '../includes/toast.php';
 require_once '../private/config/db_connection.php';
 
-// Check if user is logged in and is a coordinator
+// Apenas coordenadores podem cadastrar alunos
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     redirect_with_toast('../index.php', 'Você não está logado.');
 }
@@ -35,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     $db = new db_connection();
     $conn = $db->get_connection();
 
-    // Check if email already exists
+    // Verifica se email já existe
     $sql_check = "SELECT email FROM usuario WHERE email = ?";
     $result_check = $conn->execute_query($sql_check, [$email]);
 
@@ -46,11 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit_register'])) {
     }
 
     if ($result_check) $result_check->free();
-
-    // Hash the password
     $hashed_password = password_hash($password_register, PASSWORD_DEFAULT);
 
-    // Insert new student
     $sql_insert = "INSERT INTO usuario (email, nome_de_usuario, senha, tipo_de_conta, fk_curso_id) VALUES (?, ?, ?, 'aluno', ?)";
     $result_insert = $conn->execute_query($sql_insert, [$email, $username_register, $hashed_password, $curso_id]);
 

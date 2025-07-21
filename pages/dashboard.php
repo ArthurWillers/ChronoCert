@@ -148,7 +148,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
           <a href='category.php?category=" . urlencode($cat_id) . "' class='text-decoration-none'>
             <div class='card text-center shadow-lg h-100'>
               <div class='card-body'>
-                <h6 class='card-title fw-bold mb-3'>{$categories[$cat_id]}</h6>
+                <h6 class='card-title fw-bold mb-3'>" . htmlspecialchars(str_replace('_', ' ', $categories[$cat_id])) . "</h6>
                 <div class='position-relative mb-2'>
                   <div class='fw-bold mb-1'>{$sum}/{$limit}h</div>
                   <div class='progress'>
@@ -219,7 +219,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
                 <option selected disabled value="">Selecione a categoria do certificado</option>
                 <?php foreach ($categories as $cat_id => $nome): ?>
                   <option value="<?php echo htmlspecialchars($cat_id); ?>">
-                    <?php echo htmlspecialchars($nome); ?>
+                    <?php echo htmlspecialchars(str_replace('_', ' ', $nome)); ?>
                   </option>
                 <?php endforeach; ?>
               </select>

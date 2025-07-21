@@ -147,7 +147,7 @@ if ($user_course_result) $user_course_result->free();
         <div class='col-12'>
           <div class='card text-center shadow-lg'>
             <div class='card-body p-4'>
-              <h5 class='card-title fw-bold mb-3'>" . htmlspecialchars($category_name) . "</h5>
+              <h5 class='card-title fw-bold mb-3'>" . htmlspecialchars(str_replace('_', ' ', $category_name)) . "</h5>
               <div class='position-relative mb-2'>
                 <div class='fw-bold mb-2 fs-5'>{$total_hours}/{$category_limit}h</div>
                 <div class='progress' style='height: 25px;'>
@@ -275,7 +275,7 @@ if ($user_course_result) $user_course_result->free();
                   while ($cat = $all_categories_result->fetch_assoc()) {
                     $selected = ($cat['id'] == $category_id) ? 'selected' : '';
                     echo "<option value='" . htmlspecialchars($cat['id']) . "' $selected>";
-                    echo htmlspecialchars($cat['nome']);
+                    echo htmlspecialchars(str_replace('_', ' ', $cat['nome']));
                     echo "</option>";
                   }
                   $all_categories_result->free();
