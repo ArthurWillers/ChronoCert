@@ -58,7 +58,6 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
             <ul class="dropdown-menu dropdown-menu-end " style="right:0; left:auto;">
               <li><a class="dropdown-item" href="../actions/logout.php">Deslogar</a></li>
               <li><a class="dropdown-item spinner-trigger" href="../actions/recover_password/send_email.php">Alterar Senha</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0);" onclick="open_delete_modal('<?php echo htmlspecialchars($_SESSION['user_email']); ?>')">Excluir Conta</a></li>
             </ul>
           </li>
         </ul>
@@ -90,9 +89,9 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
       $sql_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
       $categories_result = $conn->execute_query($sql_categories, [$user_course_id]);
-      
+
       $categories = [];
-      
+
       if ($categories_result && $categories_result->num_rows > 0) {
         while ($cat = $categories_result->fetch_assoc()) {
           $categories[$cat['id']] = $cat['nome'];
@@ -167,33 +166,6 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     </div>
   </div>
 
-  <div class="modal fade" id="delete_account_modal" tabindex="-1" aria-labelledby="delete_account_modal_label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="delete_account_modal_label">Excluir Conta</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form action="../actions/delete_account.php" method="POST">
-            <div class="mb-3">
-              <label class="form-label">Email:</label>
-              <input type="text" class="form-control" id="delete_email" name="delete_email" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="delete_confirm_email" class="form-label">Digite o e-mail para confirmar:</label>
-              <input type="email" class="form-control" name="delete_confirm_email" id="delete_confirm_email" required>
-              <div id="email_feedback" class="form-text text-danger d-none">O e-mail não confere.</div>
-            </div>
-            <div class="text-end">
-              <button type="submit" id="delete_account_btn" class="btn btn-danger" name="delete_submit" disabled>Excluir Conta</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="modal fade" id="add_certificate_modal" tabindex="-1" aria-labelledby="add_certificate_modal_label" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -240,37 +212,11 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     </div>
   </div>
 
-  <?php include '../includes/spinner.php'?>
+  <?php include '../includes/spinner.php' ?>
   <script src="../assets/js/spinner.js"></script>
   <?php include '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
   <script>
-    function open_delete_modal(email) {
-      document.getElementById("email_feedback").classList.add("d-none");
-      document.getElementById("delete_confirm_email").value = "";
-      document.getElementById("delete_email").value = email;
-      const modal = new bootstrap.Modal(document.getElementById("delete_account_modal"));
-      modal.show();
-    }
-
-    document.getElementById("delete_confirm_email").addEventListener("input", function() {
-      const typedEmail = this.value;
-      const userEmail = document.getElementById("delete_email").value;
-      const feedback = document.getElementById("email_feedback");
-      const deleteBtn = document.getElementById("delete_account_btn");
-
-      if (typedEmail === "") {
-        feedback.classList.add("d-none");
-        deleteBtn.disabled = true;
-      } else if (typedEmail === userEmail) {
-        feedback.classList.add("d-none");
-        deleteBtn.disabled = false;
-      } else {
-        feedback.classList.remove("d-none");
-        deleteBtn.disabled = true;
-      }
-    });
-
     document.addEventListener("DOMContentLoaded", function() {
       const certModal = document.getElementById('add_certificate_modal');
       const form = document.querySelector("#add_certificate_modal form");

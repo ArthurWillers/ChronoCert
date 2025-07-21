@@ -464,42 +464,56 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body p-4">
-          <div class="alert alert-danger d-flex align-items-start" role="alert">
+          <div class="alert alert-warning d-flex align-items-start" role="alert">
             <i class="bi bi-exclamation-triangle-fill fs-3 me-3 mt-1"></i>
             <div>
               <h5 class="alert-heading mb-2">⚠️ Atenção! Esta ação é irreversível.</h5>
               <p class="mb-0">
-                Ao deletar sua conta, todos os seus dados serão <strong>permanentemente removidos</strong> do sistema,
-                incluindo todos os alunos cadastrados e suas informações.
+                Ao deletar sua conta, apenas seus dados pessoais serão <strong>permanentemente removidos</strong> do sistema.
+                Os alunos e dados do curso permanecerão no sistema.
               </p>
             </div>
           </div>
 
-          <div class="card border-danger">
-            <div class="card-header bg-danger text-white">
-              <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>Dados que serão perdidos:</h6>
+          <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+              <h6 class="mb-0"><i class="bi bi-info-circle me-2"></i>O que será removido:</h6>
             </div>
             <div class="card-body">
               <ul class="list-unstyled mb-0">
-                <li class="mb-2"><i class="bi bi-check2 text-danger me-2"></i>Sua conta de coordenador</li>
-                <li class="mb-2"><i class="bi bi-check2 text-danger me-2"></i>Todos os alunos cadastrados</li>
-                <li class="mb-2"><i class="bi bi-check2 text-danger me-2"></i>Todas as categorias criadas</li>
-                <li class="mb-0"><i class="bi bi-check2 text-danger me-2"></i>Histórico completo do curso</li>
+                <li class="mb-2"><i class="bi bi-check2 text-warning me-2"></i>Sua conta de coordenador</li>
+                <li class="mb-2"><i class="bi bi-check2 text-warning me-2"></i>Seus dados pessoais (nome, email, senha)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card border-success mt-3">
+            <div class="card-header bg-success text-white">
+              <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>O que será preservado:</h6>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i>Todos os alunos cadastrados</li>
+                <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i>Todas as categorias do curso</li>
+                <li class="mb-2"><i class="bi bi-check2 text-success me-2"></i>Certificados dos alunos</li>
+                <li class="mb-0"><i class="bi bi-check2 text-success me-2"></i>Histórico completo do curso</li>
               </ul>
             </div>
           </div>
 
           <div class="mt-4 text-center">
-            <p class="fw-semibold">Tem certeza de que deseja continuar?</p>
+            <p class="fw-semibold">Tem certeza de que deseja deletar apenas sua conta?</p>
           </div>
         </div>
         <div class="modal-footer bg-light">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
             <i class="bi bi-x-circle me-1"></i>Cancelar
           </button>
-          <a href="../actions/delete_account.php" class="btn btn-danger">
-            <i class="bi bi-trash me-1"></i>Confirmar Exclusão
-          </a>
+          <form method="POST" action="../actions/delete_account.php" class="d-inline">
+            <button type="submit" name="delete_submit" class="btn btn-warning">
+              <i class="bi bi-person-x me-1"></i>Deletar Minha Conta
+            </button>
+          </form>
         </div>
       </div>
     </div>
