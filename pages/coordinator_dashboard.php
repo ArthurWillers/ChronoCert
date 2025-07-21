@@ -370,8 +370,11 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                   Em horas (ex: 40)
                 </div>
               </div>
-              <div class="col-md-3 d-flex align-items-end">
-                <button type="submit" name="add_category" class="btn btn-success btn-lg w-100">
+              <div class="col-md-3">
+                <label class="form-label fw-semibold invisible">
+                  Botão
+                </label>
+                <button type="submit" name="add_category" class="btn btn-success btn-lg w-100 d-block">
                   <i class="bi bi-plus-circle me-1"></i>Adicionar
                 </button>
               </div>
@@ -548,6 +551,58 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
     </div>
   </div>
 
+  <!-- Delete Category Modal -->
+  <div class="modal fade" id="delete_category_modal" tabindex="-1" aria-labelledby="delete_category_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="delete_category_modal_label">
+            <i class="bi bi-exclamation-triangle me-2"></i>Excluir Categoria
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-danger d-flex align-items-start" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 mt-1"></i>
+            <div>
+              <h5 class="alert-heading mb-2">⚠️ Atenção! Esta ação é irreversível.</h5>
+              <p class="mb-0">
+                Tem certeza de que deseja excluir esta categoria? <strong>Esta ação não pode ser desfeita.</strong>
+              </p>
+            </div>
+          </div>
+
+          <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+              <h6 class="mb-0"><i class="bi bi-trash me-2"></i>Categoria que será removida:</h6>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-tag-fill text-danger fs-4 me-3"></i>
+                <div>
+                  <strong id="category-name-display"></strong>
+                  <div class="text-muted small">ID: #<span id="category-id-display"></span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <p class="fw-semibold text-danger">Esta ação removerá permanentemente a categoria do sistema.</p>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancelar
+          </button>
+          <button type="button" class="btn btn-danger" id="confirm-delete-category">
+            <i class="bi bi-trash me-1"></i>Excluir Categoria
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Delete Student Modal -->
   <div class="modal fade" id="delete_student_modal" tabindex="-1" aria-labelledby="delete_student_modal_label" aria-hidden="true">
     <div class="modal-dialog modal-lg">
@@ -609,6 +664,8 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
   <script src="../assets/js/toggle_password_visibility.js"></script>
 
   <script>
+    let categoryToDelete = null;
+
     function showDeleteStudentModal(email, username) {
       // Preenche os dados do aluno no modal
       document.getElementById('student-name-display').textContent = username;
@@ -618,6 +675,42 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
       // Abre o modal
       const modal = new bootstrap.Modal(document.getElementById('delete_student_modal'));
       modal.show();
+    }
+
+    function showToastMessage(message, isSuccess = false) {
+      const toastContainer = document.querySelector('.toast-container') || createToastContainer();
+      const toastId = 'toast_' + Date.now();
+
+      const toastHtml = `
+        <div class="toast ${isSuccess ? 'border-success' : 'border-danger'}" role="alert" id="${toastId}">
+          <div class="toast-header ${isSuccess ? 'bg-success' : 'bg-danger'} text-white">
+            <i class="bi ${isSuccess ? 'bi-check-circle' : 'bi-exclamation-triangle'} me-2"></i>
+            <strong class="me-auto">${isSuccess ? 'Sucesso' : 'Erro'}</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+          </div>
+          <div class="toast-body">
+            ${message}
+          </div>
+        </div>
+      `;
+
+      toastContainer.insertAdjacentHTML('beforeend', toastHtml);
+      const toastElement = document.getElementById(toastId);
+      const toast = new bootstrap.Toast(toastElement);
+      toast.show();
+
+      // Remove o toast após ser fechado
+      toastElement.addEventListener('hidden.bs.toast', () => {
+        toastElement.remove();
+      });
+    }
+
+    function createToastContainer() {
+      const container = document.createElement('div');
+      container.className = 'toast-container position-fixed top-0 end-0 p-3';
+      container.style.zIndex = '9999';
+      document.body.appendChild(container);
+      return container;
     }
 
     function editCategory(id) {
@@ -653,12 +746,12 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
       const newHours = document.getElementById('category_hours_edit_' + id).value;
 
       if (!newName.trim()) {
-        alert('O nome da categoria não pode estar vazio');
+        showToastMessage('O nome da categoria não pode estar vazio');
         return;
       }
 
       if (!newHours || newHours < 1 || newHours > 200) {
-        alert('A carga horária deve estar entre 1 e 200 horas');
+        showToastMessage('A carga horária deve estar entre 1 e 200 horas');
         return;
       }
 
@@ -679,22 +772,43 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
               '<i class="bi bi-tag-fill text-primary me-2"></i>' + newName.replace(/_/g, ' ');
             document.getElementById('category_hours_' + id).textContent = newHours + 'h';
             cancelEdit(id);
-            location.reload(); // Reload to show success message
+            showToastMessage('Categoria atualizada com sucesso!', true);
+            setTimeout(() => location.reload(), 1500);
           } else {
-            alert('Erro ao atualizar categoria: ' + data.message);
+            showToastMessage('Erro ao atualizar categoria: ' + data.message);
           }
         })
         .catch(error => {
-          alert('Erro ao atualizar categoria');
+          showToastMessage('Erro ao atualizar categoria');
           console.error('Error:', error);
         });
     }
 
-    function deleteCategory(id) {
-      if (confirm('Tem certeza de que deseja excluir esta categoria? Esta ação não pode ser desfeita.')) {
-        window.location.href = '../actions/delete_category.php?id=' + id;
-      }
+    function showDeleteCategoryModal(id, categoryName) {
+      categoryToDelete = id;
+      document.getElementById('category-name-display').textContent = categoryName.replace(/_/g, ' ');
+      document.getElementById('category-id-display').textContent = id;
+
+      const modal = new bootstrap.Modal(document.getElementById('delete_category_modal'));
+      modal.show();
     }
+
+    function deleteCategory(id) {
+      // Busca o nome da categoria na linha da tabela
+      const categoryNameElement = document.getElementById('category_name_' + id);
+      const categoryName = categoryNameElement.textContent.trim().replace('🏷️', '').trim();
+
+      showDeleteCategoryModal(id, categoryName);
+    }
+
+    // Event listener para o botão de confirmação do modal
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('confirm-delete-category').addEventListener('click', function() {
+        if (categoryToDelete) {
+          window.location.href = '../actions/delete_category.php?id=' + categoryToDelete;
+        }
+      });
+    });
   </script>
 
 </body>
