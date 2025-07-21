@@ -364,7 +364,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                   <i class="bi bi-clock text-warning me-1"></i>Carga Horária Máxima
                 </label>
                 <input type="number" name="carga_maxima" id="carga_maxima" class="form-control form-control-lg"
-                  placeholder="Horas" min="1" max="200" value="40" required>
+                  placeholder="Horas" min="1" max="1000" required>
                 <div class="form-text">
                   <i class="bi bi-info-circle me-1"></i>
                   Em horas (ex: 40)
