@@ -33,7 +33,7 @@ require_once '../../includes/toast.php';
       <div class="col-md-8 col-lg-6 col-xl-4 mx-auto">
         <div class="card shadow-lg p-4">
           <h3 class="text-center mb-4">Alterar Senha</h3>
-          <form method="POST" action="../../actions/recover_password/send_email.php">
+          <form method="POST" action="../../actions/recover_password/send_email.php" class="spinner-trigger">
             <div class="input-group mb-3">
               <input type="email" name="email_recover_password" id="email_recover_password" class="form-control" placeholder="Digite seu E-mail" required>
             </div>
@@ -44,8 +44,8 @@ require_once '../../includes/toast.php';
     </div>
   </div>
 
-  <?php include '../includes/spinner.php'?>
-  <script src="../assets/js/spinner.js"></script>
+  <?php include '../../includes/spinner.php'?>
+  <script src="../../assets/js/spinner.js"></script>
   <?php include '../../includes/bootstrap_script.php' ?>
   <script src="../../assets/js/toast.js"></script>
   <script>

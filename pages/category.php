@@ -253,7 +253,7 @@ if ($user_course_result) $user_course_result->free();
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data">
+          <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data" class="spinner-trigger">
             <div class="mb-3">
               <label class="form-label">Nome</label>
               <input type="text" class="form-control" name="nome_pessoal" placeholder="Digite o nome que consta no certificado" maxlength="255" required>
