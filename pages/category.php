@@ -110,7 +110,8 @@ if ($user_course_result) $user_course_result->free();
     $sql = "SELECT SUM(carga_horaria) AS total 
             FROM certificado 
             WHERE fk_usuario_email = ? 
-            AND fk_categoria_id = ?";
+            AND fk_categoria_id = ?
+            AND status = 'válido'";
 
     try {
       $result = $conn->execute_query($sql, [$user_email, $category_id]);
@@ -267,10 +268,10 @@ if ($user_course_result) $user_course_result->free();
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option disabled value="">Selecione a categoria do certificado</option>
-                <?php 
+                <?php
                 $sql_all_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
                 $all_categories_result = $conn->execute_query($sql_all_categories, [$user_course_id]);
-                
+
                 if ($all_categories_result && $all_categories_result->num_rows > 0) {
                   while ($cat = $all_categories_result->fetch_assoc()) {
                     $selected = ($cat['id'] == $category_id) ? 'selected' : '';
@@ -299,7 +300,7 @@ if ($user_course_result) $user_course_result->free();
     </div>
   </div>
 
-  <?php 
+  <?php
   // Close database connection
   $db->close_connection();
   ?>

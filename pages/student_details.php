@@ -43,11 +43,12 @@ $sql_hours_by_category = "SELECT c.fk_categoria_id, cat.nome as categoria_nome, 
                           FROM certificado c 
                           INNER JOIN categoria cat ON c.fk_categoria_id = cat.id 
                           WHERE c.fk_usuario_email = ? 
+                          AND c.status = 'válido'
                           GROUP BY c.fk_categoria_id, cat.nome";
 $hours_by_category_result = $conn->execute_query($sql_hours_by_category, [$student_email]);
 
 // Get total hours
-$sql_total = "SELECT SUM(carga_horaria) as total_horas FROM certificado WHERE fk_usuario_email = ?";
+$sql_total = "SELECT SUM(carga_horaria) as total_horas FROM certificado WHERE fk_usuario_email = ? AND status = 'válido'";
 $total_result = $conn->execute_query($sql_total, [$student_email]);
 $total_hours = 0;
 if ($total_result && $total_result->num_rows > 0) {

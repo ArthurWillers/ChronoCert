@@ -34,7 +34,8 @@ $sql_students = "SELECT
     email,
     (SELECT COALESCE(SUM(carga_horaria), 0) 
      FROM certificado 
-     WHERE fk_usuario_email = usuario.email) AS total_horas
+     WHERE fk_usuario_email = usuario.email 
+     AND status = 'válido') AS total_horas
 FROM usuario
 WHERE tipo_de_conta = 'aluno' AND fk_curso_id = ?
 ORDER BY nome_de_usuario";

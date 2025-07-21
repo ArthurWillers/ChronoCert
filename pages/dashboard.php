@@ -106,7 +106,8 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
           $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
                     WHERE fk_usuario_email = ? 
-                    AND fk_categoria_id = ?";
+                    AND fk_categoria_id = ?
+                    AND status = 'válido'";
 
           $result = $conn->execute_query($sql, [$user_email, $cat_id]);
           $row = $result->fetch_assoc();
