@@ -12,21 +12,44 @@ O ChronoCert permite o upload, organização por categorias e controle de carga 
 
 - **Autenticação de usuários**: Registro, login e recuperação de senha
 - **Gerenciamento de certificados**: Upload, visualização, download e exclusão
-- **Categorização**: Organização por 13 categorias acadêmicas diferentes
+- **Categorização**: Organização por categorias acadêmicas diferentes por curso
 - **Controle de carga horária**: Acompanhamento do progresso por categoria
 - **Download em lote**: Baixar todos os certificados em um arquivo ZIP
 - **Recuperação de senha**: Sistema de código de verificação por email
 - **Interface responsiva**: Design adaptável para diferentes dispositivos
 
+## Requisitos do Sistema
+
+### Requisitos mínimos
+- **PHP**: 8.1 ou superior
+- **Banco de dados**: MariaDB 10.6+ ou MySQL 8.0+
+- **Servidor web**: Apache 2.4+ ou Nginx 1.18+
+- **Extensões PHP necessárias**:
+  - `mysqli`
+  - `mbstring`
+  - `fileinfo`
+  - `zip`
+  - `openssl`
+
+### Configurações PHP recomendadas
+```ini
+upload_max_filesize = 10M
+post_max_size = 12M
+max_execution_time = 300
+memory_limit = 256M
+session.cookie_secure = 1
+session.cookie_httponly = 1
+```
+
 ## Tecnologias Utilizadas
 
-- **Backend**: PHP 8.4+
-- **Banco de dados**: MariaDB/MySQL 10.11+
+- **Backend**: PHP 8.1+
+- **Banco de dados**: MariaDB 10.6+ / MySQL 8.0+
 - **Frontend**: Bootstrap 5.3.6, HTML5, CSS3, JavaScript
 - **Gerenciamento de dependências**: Composer
-- **Bibliotecas**:
+- **Bibliotecas principais**:
   - PHPMailer 6.10+ (envio de emails)
-  - vlucas/phpdotenv 5.6+ (variáveis de ambiente)
+  - vlucas/phpdotenv 5.6+ (gerenciamento de variáveis de ambiente)
 
 ## Contexto Acadêmico
 
@@ -69,7 +92,7 @@ cp private/config/.env.example private/config/.env
 
 Edite o arquivo `private/config/.env` com suas configurações:
 
-```bash
+```env
 # DB Connection
 DB_HOST=localhost
 DB_USERNAME=seu_usuario
@@ -83,80 +106,137 @@ SMTP_USER=seu_email@gmail.com
 SMTP_PASS="sua_senha_app"
 ```
 
-### 5. Crie as pastas necessárias e configure as permissões
+### 5. Configure as permissões para as pastas necessárias
 
 ```bash
-mkdir -p /var/www/html/ChronoCert/private/uploads
-mkdir -p /var/www/html/ChronoCert/private/tmp
+# Ubuntu/Debian
+sudo chown -R www-data:www-data private/uploads private/tmp
+sudo chmod -R 775 private/uploads private/tmp
 
-sudo chown -R www-data:www-data /var/www/html/ChronoCert/private/uploads
-sudo chmod -R 775 /var/www/html/ChronoCert/private/uploads
-
-sudo chown -R www-data:www-data /var/www/html/ChronoCert/private/tmp
-sudo chmod -R 775 /var/www/html/ChronoCert/private/tmp
+# Fedora/RHEL/CentOS
+sudo chown -R apache:apache private/uploads private/tmp
+sudo chmod -R 775 private/uploads private/tmp
 ```
 
 ### 6. Configure o servidor web
 
 #### Apache
-
-Adicione às configurações do apache:
+Adicione ao arquivo de configuração do Apache para proteger diretórios privados:
 
 ```apache
-<Directory /var/www/html/ChronoCert/private>
+<Directory "/var/www/html/ChronoCert/private">
     AllowOverride None
     Require all denied
 </Directory>
 ```
 
+#### Nginx
+Para Nginx, adicione ao seu arquivo de configuração:
+
+```nginx
+location /ChronoCert/private {
+    deny all;
+    return 404;
+}
+```
+
 ### 7. Configure o SELinux (se aplicável)
 
+Se você estiver usando um sistema com SELinux ativado (como RHEL/CentOS), execute:
+
 ```bash
-sudo chcon -R -t httpd_sys_rw_content_t /var/www/html/ChronoCert/private/uploads
-sudo chcon -R -t httpd_sys_rw_content_t /var/www/html/ChronoCert/private/tmp
+setsebool -P httpd_can_network_connect 1
+chcon -R -t httpd_sys_rw_content_t private/uploads
+chcon -R -t httpd_sys_rw_content_t private/tmp
 ```
 
 ### 8. Criação de usuário coordenador
 
-Para criar um usuário coordenador, faça uma inserção na tabela `usuario` do banco de dados, e, no campo senha, ponha o resultado do seguinte comando, substituindo `[SENHA]` pela senha desejada:
+Para criar um usuário coordenador, você deve inserir um registro na tabela `usuario` do banco de dados. Para a senha, use o hash gerado pelo seguinte comando:
 
+```bash
+php private/config/senha-coordenador.php [SUA_SENHA]
 ```
-php private/config/senha-coordenador.php [SENHA]
+
+Em seguida, faça uma inserção SQL como esta:
+
+```sql
+INSERT INTO usuario (email, nome_de_usuario, senha, tipo_de_conta, fk_curso_id) 
+VALUES ('coordenador@exemplo.com', 'Nome do Coordenador', 'HASH_GERADO_PELO_SCRIPT', 'coordenador', 4);
 ```
+
+> **Nota**: Substitua `fk_curso_id` pelo ID do curso correspondente:
+> - 1 = Administração
+> - 2 = Alimentos  
+> - 3 = Agropecuária
+> - 4 = Informática (com categorias pré-cadastradas)
 
 ## Configuração de Email
 
-Para o sistema de recuperação de senha funcionar, configure um provedor SMTP:
+Para o sistema de recuperação de senha funcionar, você precisa configurar um provedor SMTP.
 
 ### Gmail
-1. Ative a autenticação de dois fatores
-2. Gere uma senha de aplicativo
-3. Use a senha de aplicativo no arquivo `.env`
+1. **Ative a autenticação de dois fatores** na sua conta Google
+2. **Gere uma senha de aplicativo**:
+   - Acesse [myaccount.google.com](https://myaccount.google.com)
+   - Vá em "Segurança" → "Senhas de app"
+   - Selecione "App" → "Outro" e digite "ChronoCert"
+   - Use a senha gerada no arquivo `.env`
 
-### Outros provedores
-Consulte a documentação do seu provedor SMTP para configurações específicas.
+3. **Configure o arquivo `.env`**:
+   ```env
+   SMTP_HOST=smtp.gmail.com
+   SMTP_PORT=465
+   SMTP_USER=seuemail@gmail.com
+   SMTP_PASS="senha_de_aplicativo_gerada"
+   ```
+
+### Outros provedores SMTP
+Consulte a documentação do seu provedor
+
+### Teste de configuração
+Para testar se o email está funcionando, você pode usar o próprio sistema de recuperação de senha ou executar um teste manual.
 
 ## Categorias de Certificados
 
-O sistema, por padrão, tem 13 categorias em 4 cursos com limites de carga horária conforme diretrizes acadêmicas:
+O sistema suporta múltiplos cursos técnicos, cada um com suas próprias categorias de atividades complementares. Atualmente, as categorias estão pré-cadastradas apenas para o **Curso Técnico em Informática**.
 
-1. **Bolsa, Projetos de Ensino e Extensões** (40h)
-2. **Ouvinte em Eventos relacionados ao Curso** (60h)
-3. **Organizador em Eventos relacionados ao Curso** (20h)
-4. **Voluntário em Áreas do Curso** (20h)
-5. **Estágio Não Obrigatório** (40h)
-6. **Publicação, Apresentação e Premiação de Trabalhos** (20h)
-7. **Visitas e Viagens de Estudo relacionadas ao Curso** (30h)
-8. **Curso de Formação na Área Específica** (40h)
-9. **Ouvinte em Apresentação de Trabalhos** (10h)
-10. **Curso de Línguas** (30h)
-11. **Monitor em Áreas do Curso** (30h)
-12. **Participações Artísticas e Institucionais** (20h)
-13. **Atividades Colegiais Representativas** (20h)
+### Cursos disponíveis no sistema:
+- **Administração** (ID: 1) - *sem categorias pré-cadastradas*
+- **Alimentos** (ID: 2) - *sem categorias pré-cadastradas*
+- **Agropecuária** (ID: 3) - *sem categorias pré-cadastradas*
+- **Informática** (ID: 4) - *com 13 categorias pré-cadastradas*
+
+### Categorias do Curso de Informática:
+1. **Bolsa, Projetos de Ensino e Extensões** - 40h
+2. **Ouvinte em Eventos Relacionados ao Curso** - 60h
+3. **Organizador em Eventos Relacionados ao Curso** - 20h
+4. **Voluntário em Áreas do Curso** - 20h
+5. **Estágio Não Obrigatório** - 40h
+6. **Publicação, Apresentação e Premiação de Trabalhos** - 20h
+7. **Visitas e Viagens de Estudo Relacionadas ao Curso** - 30h
+8. **Curso de Formação na Área Específica** - 40h
+9. **Ouvinte em Apresentação de Trabalhos** - 10h
+10. **Curso de Línguas** - 30h
+11. **Monitor em Áreas do Curso** - 30h
+12. **Participações Artísticas e Institucionais** - 20h
+13. **Atividades Colegiais Representativas** - 20h
+
+> **Total máximo de horas para Informática**: 380 horas
+
+### Adicionando categorias para outros cursos
+Para adicionar categorias aos outros cursos, crie um usuario coordenador para o curso, entre no sistema e utilize a interface de gerenciar categorias.
+
+### Adicionando novo curso
+Para adicionar um novo curso ao sistema, insira um registro na tabela `curso` do banco de dados. Exemplo:
+
+```sql
+INSERT INTO curso (nome) VALUES ('Nome do Curso');
+```
 
 ## Segurança
 
-- Senhas são criptografadas com bcrypt
+- Senhas são hashed com bcrypt
 - Arquivos são armazenados fora do diretório web público
 - Validação de tipo MIME para uploads
 - Proteção contra acesso direto a arquivos sensíveis
@@ -165,36 +245,97 @@ O sistema, por padrão, tem 13 categorias em 4 cursos com limites de carga horá
 
 ## Manutenção
 
-### Limpeza automática
-O banco possui um evento que remove códigos de verificação expirados automaticamente a cada segundo (o evento não vem ativado por padrão).
+### Limpeza automática de códigos de verificação
+O banco possui um evento automático que remove códigos de verificação expirados a cada segundo. Por padrão, este evento não vem ativado. Para ativá-lo:
+
+```sql
+-- Ativar o scheduler de eventos
+SET GLOBAL event_scheduler = ON;
+
+-- Criar evento de limpeza (se não existir)
+CREATE EVENT IF NOT EXISTS cleanup_expired_codes
+ON SCHEDULE EVERY 1 SECOND
+DO
+  DELETE FROM codigo_de_verificacao 
+  WHERE TIMESTAMPDIFF(MINUTE, hora_da_criacao, NOW()) > 3;
+```
+
+### Backup do banco de dados
+```bash
+# Backup completo
+mysqldump -u [usuario] -p ChronoCert > backup_chronocert_$(date +%Y%m%d_%H%M%S).sql
+
+# Backup apenas da estrutura
+mysqldump -u [usuario] -p --no-data ChronoCert > schema_backup.sql
+
+# Backup apenas dos dados
+mysqldump -u [usuario] -p --no-create-info ChronoCert > data_backup.sql
+```
 
 ## Troubleshooting
 
-### Problemas comuns
+### Problemas comuns e soluções
 
-**Erro de conexão com banco:**
-- Verifique as credenciais no arquivo `.env`
-- Confirme se o banco de dados existe
-- Teste a conectividade: `mysql -u usuario -p -h host`
+#### Erro de conexão com banco de dados
+```bash
+# Verifique as credenciais no arquivo .env
+cat private/config/.env
 
-**Upload de arquivos falha:**
-- Verifique permissões da pasta `private/uploads/`
-- Confirme `upload_max_filesize` e `post_max_size` no PHP
-- Verifique espaço em disco
+# Teste a conectividade manualmente
+mysql -u [usuario] -p -h [host] [database]
 
-**Emails não são enviados:**
-- Teste configurações SMTP
-- Verifique logs do servidor
-- Confirme se as portas estão abertas
+# Verifique se o serviço MySQL/MariaDB está rodando
+systemctl status mysql
+# ou
+systemctl status mariadb
+```
 
+#### Upload de arquivos falha
+```bash
+# Verifique permissões
+ls -la private/uploads/
+ls -la private/tmp/
 
-## Finalidade Acadêmica
+# Redefina permissões se necessário
+# Ubuntu/Debian
+chmod -R 775 private/uploads private/tmp
+chown -R www-data:www-data private/uploads private/tmp
 
-Este projeto foi desenvolvido como trabalho acadêmico e possui as seguintes características:
+# Fedora/RHEL/CentOS
+chmod -R 775 private/uploads private/tmp
+chown -R apache:apache private/uploads private/tmp
 
-- ✅ **Escopo definido**: Focado especificamente no Curso Técnico em Informática Integrado
-- ✅ **Categorias customizadas**: Baseadas nas diretrizes do curso
-- ✅ **Limites de carga horária**: Conforme regulamentação acadêmica
+# Verifique configurações do PHP
+php -i | grep upload_max_filesize
+php -i | grep post_max_size
+php -i | grep max_execution_time
+```
+
+#### Emails não são enviados
+```bash
+# Verifique os logs do PHP
+tail -f /var/log/php/error.log
+
+# Teste conectividade SMTP
+telnet smtp.gmail.com 465
+
+# Verifique configurações do firewall
+ufw status
+# ou
+iptables -L
+```
+
+#### Problemas de sessão
+```bash
+# Verifique configurações de sessão do PHP
+php -i | grep session
+
+# Limpe arquivos de sessão antigos
+rm -rf /tmp/sess_*
+
+# Verifique permissões do diretório de sessão
+ls -la /tmp/
+```
 
 ---
 

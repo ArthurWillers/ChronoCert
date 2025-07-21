@@ -1,3 +1,12 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.2-1.fc42
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost
+-- Generation Time: Jul 21, 2025 at 01:02 PM
+-- Server version: 10.11.11-MariaDB
+-- PHP Version: 8.4.10
+
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
@@ -8,7 +17,16 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
--- Estrutura para tabela `categoria`
+--
+-- Database: `chronocert`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `categoria`
+--
+
 CREATE TABLE `categoria` (
   `id` int(11) NOT NULL,
   `nome` varchar(255) NOT NULL,
@@ -16,47 +34,11 @@ CREATE TABLE `categoria` (
   `carga_maxima` int(11) NOT NULL DEFAULT 40
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Despejando dados para a tabela `categoria`
+--
+-- Dumping data for table `categoria`
+--
+
 INSERT INTO `categoria` (`id`, `nome`, `fk_curso_id`, `carga_maxima`) VALUES
-(1, 'Bolsa_Projeto_de_Ensino_e_Extensões', 1, 40),
-(2, 'Ouvinte_em_Eventos_Relacionados_ao_Curso', 1, 60),
-(3, 'Organizador_em_Eventos_Relacionados_ao_Curso', 1, 20),
-(4, 'Voluntário_em_Áreas_do_Curso', 1, 20),
-(5, 'Estágio_Não_Obrigatório', 1, 40),
-(6, 'Publicação_Apresentação_e_Premiação_de_Trabalhos', 1, 20),
-(7, 'Visitas_e_Viagens_de_Estudo_Relacionadas_ao_Curso', 1, 30),
-(8, 'Curso_de_Formação_na_Área_Específica', 1, 40),
-(9, 'Ouvinte_em_Apresentação_de_Trabalhos', 1, 10),
-(10, 'Curso_de_Línguas', 1, 30),
-(11, 'Monitor_em_Áreas_do_Curso', 1, 30),
-(12, 'Participações_Artísticas_e_Institucionais', 1, 20),
-(13, 'Atividades_Colegiais_Representativas', 1, 20),
-(14, 'Bolsa_Projeto_de_Ensino_e_Extensões', 2, 40),
-(15, 'Ouvinte_em_Eventos_Relacionados_ao_Curso', 2, 60),
-(16, 'Organizador_em_Eventos_Relacionados_ao_Curso', 2, 20),
-(17, 'Voluntário_em_Áreas_do_Curso', 2, 20),
-(18, 'Estágio_Não_Obrigatório', 2, 40),
-(19, 'Publicação_Apresentação_e_Premiação_de_Trabalhos', 2, 20),
-(20, 'Visitas_e_Viagens_de_Estudo_Relacionadas_ao_Curso', 2, 30),
-(21, 'Curso_de_Formação_na_Área_Específica', 2, 40),
-(22, 'Ouvinte_em_Apresentação_de_Trabalhos', 2, 10),
-(23, 'Curso_de_Línguas', 2, 30),
-(24, 'Monitor_em_Áreas_do_Curso', 2, 30),
-(25, 'Participações_Artísticas_e_Institucionais', 2, 20),
-(26, 'Atividades_Colegiais_Representativas', 2, 20),
-(27, 'Bolsa_Projeto_de_Ensino_e_Extensões', 3, 40),
-(28, 'Ouvinte_em_Eventos_Relacionados_ao_Curso', 3, 60),
-(29, 'Organizador_em_Eventos_Relacionados_ao_Curso', 3, 20),
-(30, 'Voluntário_em_Áreas_do_Curso', 3, 20),
-(31, 'Estágio_Não_Obrigatório', 3, 40),
-(32, 'Publicação_Apresentação_e_Premiação_de_Trabalhos', 3, 20),
-(33, 'Visitas_e_Viagens_de_Estudo_Relacionadas_ao_Curso', 3, 30),
-(34, 'Curso_de_Formação_na_Área_Específica', 3, 40),
-(35, 'Ouvinte_em_Apresentação_de_Trabalhos', 3, 10),
-(36, 'Curso_de_Línguas', 3, 30),
-(37, 'Monitor_em_Áreas_do_Curso', 3, 30),
-(38, 'Participações_Artísticas_e_Institucionais', 3, 20),
-(39, 'Atividades_Colegiais_Representativas', 3, 20),
 (40, 'Bolsa_Projeto_de_Ensino_e_Extensões', 4, 40),
 (41, 'Ouvinte_em_Eventos_Relacionados_ao_Curso', 4, 60),
 (42, 'Organizador_em_Eventos_Relacionados_ao_Curso', 4, 20),
@@ -71,37 +53,60 @@ INSERT INTO `categoria` (`id`, `nome`, `fk_curso_id`, `carga_maxima`) VALUES
 (51, 'Participações_Artísticas_e_Institucionais', 4, 20),
 (52, 'Atividades_Colegiais_Representativas', 4, 20);
 
--- Estrutura para tabela `certificado`
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `certificado`
+--
+
 CREATE TABLE `certificado` (
   `nome_do_arquivo` varchar(255) NOT NULL,
   `nome_pessoal` varchar(255) NOT NULL,
   `carga_horaria` float NOT NULL,
   `fk_usuario_email` varchar(255) NOT NULL,
   `fk_categoria_id` int(11) NOT NULL,
-  `status` enum('não_verificado','válido', 'incerto') NOT NULL DEFAULT 'não_verificado'
+  `status` enum('não_verificado','válido','incerto') NOT NULL DEFAULT 'não_verificado'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Estrutura para tabela `codigo_de_verificacao`
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `codigo_de_verificacao`
+--
+
 CREATE TABLE `codigo_de_verificacao` (
   `codigo` char(8) NOT NULL,
   `hora_da_criacao` timestamp NULL DEFAULT current_timestamp(),
   `fk_usuario_email` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Estrutura para tabela `curso`
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `curso`
+--
+
 CREATE TABLE `curso` (
   `id` int(11) NOT NULL,
   `nome` varchar(255) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Despejando dados para a tabela `curso`
+--
+-- Dumping data for table `curso`
+--
+
 INSERT INTO `curso` (`id`, `nome`) VALUES
 (1, 'Administração'),
 (2, 'Alimentos'),
 (3, 'Agropecuária'),
 (4, 'Informática');
 
--- Estrutura para tabela `usuario`
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `usuario`
+--
+
 CREATE TABLE `usuario` (
   `email` varchar(255) NOT NULL,
   `nome_de_usuario` varchar(255) NOT NULL,
@@ -110,53 +115,87 @@ CREATE TABLE `usuario` (
   `fk_curso_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Índices de tabela `categoria`
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `categoria`
+--
 ALTER TABLE `categoria`
   ADD PRIMARY KEY (`id`),
   ADD KEY `FK_Categoria_Curso` (`fk_curso_id`);
 
--- Índices de tabela `certificado`
+--
+-- Indexes for table `certificado`
+--
 ALTER TABLE `certificado`
   ADD PRIMARY KEY (`nome_do_arquivo`),
   ADD KEY `FK_Certificado_Usuario` (`fk_usuario_email`),
   ADD KEY `FK_Certificado_Categoria` (`fk_categoria_id`);
 
--- Índices de tabela `codigo_de_verificacao`
+--
+-- Indexes for table `codigo_de_verificacao`
+--
 ALTER TABLE `codigo_de_verificacao`
   ADD PRIMARY KEY (`codigo`),
   ADD KEY `FK_Codigo_de_verificacao_2` (`fk_usuario_email`);
 
--- Índices de tabela `curso`
+--
+-- Indexes for table `curso`
+--
 ALTER TABLE `curso`
   ADD PRIMARY KEY (`id`);
 
--- Índices de tabela `usuario`
+--
+-- Indexes for table `usuario`
+--
 ALTER TABLE `usuario`
   ADD PRIMARY KEY (`email`),
   ADD KEY `FK_Usuario_Curso` (`fk_curso_id`);
 
--- AUTO_INCREMENT de tabela `categoria`
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `categoria`
+--
 ALTER TABLE `categoria`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=53;
 
--- AUTO_INCREMENT de tabela `curso`
+--
+-- AUTO_INCREMENT for table `curso`
+--
 ALTER TABLE `curso`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
--- Restrições para tabelas `categoria`
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `categoria`
+--
 ALTER TABLE `categoria`
   ADD CONSTRAINT `FK_Categoria_Curso` FOREIGN KEY (`fk_curso_id`) REFERENCES `curso` (`id`);
 
--- Restrições para tabelas `certificado`
+--
+-- Constraints for table `certificado`
+--
 ALTER TABLE `certificado`
   ADD CONSTRAINT `FK_Certificado_Categoria` FOREIGN KEY (`fk_categoria_id`) REFERENCES `categoria` (`id`),
   ADD CONSTRAINT `FK_Certificado_Usuario` FOREIGN KEY (`fk_usuario_email`) REFERENCES `usuario` (`email`) ON DELETE CASCADE;
 
--- Restrições para tabelas `codigo_de_verificacao`
+--
+-- Constraints for table `codigo_de_verificacao`
+--
 ALTER TABLE `codigo_de_verificacao`
   ADD CONSTRAINT `FK_Codigo_de_verificacao_2` FOREIGN KEY (`fk_usuario_email`) REFERENCES `usuario` (`email`) ON DELETE CASCADE;
 
--- Restrições para tabelas `usuario`
+--
+-- Constraints for table `usuario`
+--
 ALTER TABLE `usuario`
   ADD CONSTRAINT `FK_Usuario_Curso` FOREIGN KEY (`fk_curso_id`) REFERENCES `curso` (`id`);
 COMMIT;
