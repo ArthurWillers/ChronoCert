@@ -33,7 +33,7 @@ require_once '../../includes/toast.php';
       <div class="col-md-8 col-lg-6 col-xl-4 mx-auto">
         <div class="card shadow-lg p-4">
           <h3 class="text-center mb-4">Redefinir Senha</h3>
-          <form method="POST" action="../../actions/recover_password/recover_password.php">
+          <form method="POST" action="../../actions/recover_password/recover_password.php" class="spinner-trigger">
 
             <div class="input-group mb-3">
               <input type="text" name="verification_code" class="form-control" placeholder="Digite o código de verificação" maxlength="8" required>
@@ -66,8 +66,8 @@ require_once '../../includes/toast.php';
     </div>
   </div>
 
-  <?php include '../includes/spinner.php'?>
-  <script src="../assets/js/spinner.js"></script>
+  <?php include '../../includes/spinner.php' ?>
+  <script src="../../assets/js/spinner.js"></script>
   <?php include '../../includes/bootstrap_script.php' ?>
   <script src="../../assets/js/toast.js"></script>
   <script src="../../assets/js/toggle_password_visibility.js"></script>

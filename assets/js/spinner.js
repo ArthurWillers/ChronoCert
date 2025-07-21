@@ -6,18 +6,20 @@ function hideSpinner() {
   document.getElementById('loading-spinner').classList.add('d-none');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const forms = document.querySelectorAll('form');
-  
-  forms.forEach(form => {
-    form.addEventListener('submit', function() {
+document.addEventListener('DOMContentLoaded', function () {
+  // Only add spinner to forms that have the spinner-trigger class
+  const formsWithSpinner = document.querySelectorAll('form.spinner-trigger');
+
+  formsWithSpinner.forEach(form => {
+    form.addEventListener('submit', function () {
       if (this.checkValidity()) {
         showSpinner();
       }
     });
   });
-  
-  document.querySelectorAll('.spinner-trigger').forEach(el => {
+
+  // Add spinner to links and buttons with spinner-trigger class
+  document.querySelectorAll('.spinner-trigger:not(form)').forEach(el => {
     el.addEventListener('click', showSpinner);
   });
 });

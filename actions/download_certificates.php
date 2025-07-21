@@ -17,7 +17,7 @@ $user_email = $_SESSION['user_email'];
 
 $db = new db_connection();
 $conn = $db->get_connection();
-$sql = "SELECT nome_do_arquivo, nome_pessoal, categoria FROM certificado WHERE fk_usuario_email = ?";
+$sql = "SELECT nome_do_arquivo, nome_pessoal, fk_categoria_id FROM certificado WHERE fk_usuario_email = ?";
 $result = $conn->execute_query($sql, [$user_email]);
 
 if (!$result || $result->num_rows == 0) {
@@ -43,8 +43,13 @@ while ($file = $result->fetch_assoc()) {
     $file_path = $upload_dir . $file['nome_do_arquivo'];
     if (file_exists($file_path)) {
 
+        // Nomes das categorias
+        $sql_cat = "SELECT nome FROM categoria WHERE id = ?";
+        $result_cat = $conn->execute_query($sql_cat, [$file['fk_categoria_id']]);
+        $category = $result_cat->fetch_assoc();
+
         $base_name = preg_replace('/[^a-zA-Z0-9_\-]/', '_', $file['nome_pessoal']);
-        $category_name = str_replace('_', ' ', $file['categoria']);
+        $category_name = str_replace('_', ' ', $category['nome']);
         $internal_name = $base_name . " - " . $category_name . ".pdf";
 
         $zip->addFile($file_path, $internal_name);

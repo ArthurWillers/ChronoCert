@@ -8,6 +8,12 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
   redirect_with_toast('../index.php', "Você não está logado. Faça login para deletar a conta.");
 }
 
+// Redirect coordinators to their specific dashboard
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'coordenador') {
+  header('Location: coordinator_dashboard.php');
+  exit();
+}
+
 $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 ?>
 
@@ -52,7 +58,6 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
             <ul class="dropdown-menu dropdown-menu-end " style="right:0; left:auto;">
               <li><a class="dropdown-item" href="../actions/logout.php">Deslogar</a></li>
               <li><a class="dropdown-item spinner-trigger" href="../actions/recover_password/send_email.php">Alterar Senha</a></li>
-              <li><a class="dropdown-item" href="javascript:void(0);" onclick="open_delete_modal('<?php echo htmlspecialchars($_SESSION['user_email']); ?>')">Excluir Conta</a></li>
             </ul>
           </li>
         </ul>
@@ -66,52 +71,47 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
       <?php
 
-      $categories_limit = [
-        'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
-        'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
-        'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
-        'Voluntario_em_Areas_do_Curso' => 20,
-        'Estagio_Nao_Obrigatorio' => 40,
-        'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 20,
-        'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 30,
-        'Curso_de_Formacao_na_Area_Especifica' => 40,
-        'Ouvinte_em_apresentacao_de_trabalhos' => 10,
-        'Curso_de_Linguas' => 30,
-        'Monitor_em_Areas_do_Curso' => 30,
-        'Participacoes_Artisticas_e_Institucionais' => 20,
-        'Atividades_Colegiais_Representativas' => 20
-      ];
-
-      $categories = [
-        'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
-        'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
-        'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
-        'Voluntario_em_Areas_do_Curso' => 'Voluntário em Áreas do Curso',
-        'Estagio_Nao_Obrigatorio' => 'Estágio Não Obrigatório',
-        'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 'Publicação, Apresentação e Premiação de Trabalhos',
-        'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 'Visitas e Viagens de Estudo relacionadas ao Curso',
-        'Curso_de_Formacao_na_Area_Especifica' => 'Curso de Formação na Área Específica',
-        'Ouvinte_em_apresentacao_de_trabalhos' => 'Ouvinte em Apresentação de Trabalhos',
-        'Curso_de_Linguas' => 'Curso de Línguas',
-        'Monitor_em_Areas_do_Curso' => 'Monitor em Áreas do Curso',
-        'Participacoes_Artisticas_e_Institucionais' => 'Participações Artísticas e Institucionais',
-        'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
-      ];
-
       $user_email = $_SESSION['user_email'];
 
       $db = new db_connection();
       $conn = $db->get_connection();
 
+      $sql_user_course = "SELECT fk_curso_id FROM usuario WHERE email = ?";
+      $user_course_result = $conn->execute_query($sql_user_course, [$user_email]);
+      $user_course_id = null;
+
+      if ($user_course_result && $user_course_result->num_rows > 0) {
+        $user_data = $user_course_result->fetch_assoc();
+        $user_course_id = $user_data['fk_curso_id'];
+      }
+
+      if ($user_course_result) $user_course_result->free();
+
+      $sql_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
+      $categories_result = $conn->execute_query($sql_categories, [$user_course_id]);
+
+      $categories = [];
+      $categories_limits = [];
+
+      if ($categories_result && $categories_result->num_rows > 0) {
+        while ($cat = $categories_result->fetch_assoc()) {
+          $categories[$cat['id']] = $cat['nome'];
+          $categories_limits[$cat['id']] = (float)$cat['carga_maxima'];
+        }
+        $categories_result->free();
+      }
+
       $categories_sum = [];
-      foreach ($categories_limit as $cat => $limit) {
+      foreach ($categories as $cat_id => $cat_name) {
+        $limit = $categories_limits[$cat_id];
         try {
           $sql = "SELECT SUM(carga_horaria) AS total 
                     FROM certificado 
                     WHERE fk_usuario_email = ? 
-                    AND FIND_IN_SET(?, categoria) > 0";
+                    AND fk_categoria_id = ?
+                    AND status = 'válido'";
 
-          $result = $conn->execute_query($sql, [$user_email, $cat]);
+          $result = $conn->execute_query($sql, [$user_email, $cat_id]);
           $row = $result->fetch_assoc();
 
           $sum = (float)($row['total'] ?? 0);
@@ -120,14 +120,15 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
             $sum = $limit;
           }
 
-          $categories_sum[$cat] = $sum;
+          $categories_sum[$cat_id] = $sum;
         } catch (Exception $e) {
-          $categories_sum[$cat] = 0;
+          $categories_sum[$cat_id] = 0;
         }
       }
 
-      foreach ($categories_limit as $cat => $limit) {
-        $sum = $categories_sum[$cat];
+      foreach ($categories as $cat_id => $cat_name) {
+        $limit = $categories_limits[$cat_id];
+        $sum = $categories_sum[$cat_id];
         $percentage = ($limit > 0) ? floor(($sum / $limit) * 100) : 0;
         if ($percentage > 100) {
           $percentage = 100;
@@ -146,10 +147,10 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
 
         echo "
         <div class='col align-items-stretch'>
-          <a href='category.php?category=" . urlencode($cat) . "' class='text-decoration-none'>
+          <a href='category.php?category=" . urlencode($cat_id) . "' class='text-decoration-none'>
             <div class='card text-center shadow-lg h-100'>
               <div class='card-body'>
-                <h6 class='card-title fw-bold mb-3'>{$categories[$cat]}</h6>
+                <h6 class='card-title fw-bold mb-3'>" . htmlspecialchars(str_replace('_', ' ', $categories[$cat_id])) . "</h6>
                 <div class='position-relative mb-2'>
                   <div class='fw-bold mb-1'>{$sum}/{$limit}h</div>
                   <div class='progress'>
@@ -168,33 +169,6 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     </div>
   </div>
 
-  <div class="modal fade" id="delete_account_modal" tabindex="-1" aria-labelledby="delete_account_modal_label" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="delete_account_modal_label">Excluir Conta</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          <form action="../actions/delete_account.php" method="POST">
-            <div class="mb-3">
-              <label class="form-label">Email:</label>
-              <input type="text" class="form-control" id="delete_email" name="delete_email" readonly>
-            </div>
-            <div class="mb-3">
-              <label for="delete_confirm_email" class="form-label">Digite o e-mail para confirmar:</label>
-              <input type="email" class="form-control" name="delete_confirm_email" id="delete_confirm_email" required>
-              <div id="email_feedback" class="form-text text-danger d-none">O e-mail não confere.</div>
-            </div>
-            <div class="text-end">
-              <button type="submit" id="delete_account_btn" class="btn btn-danger" name="delete_submit" disabled>Excluir Conta</button>
-            </div>
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="modal fade" id="add_certificate_modal" tabindex="-1" aria-labelledby="add_certificate_modal_label" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -203,7 +177,7 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data">
+          <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data" class="spinner-trigger">
             <div class="mb-3">
               <label class="form-label">Nome</label>
               <input type="text" class="form-control" name="nome_pessoal" placeholder="Digite o nome que consta no certificado" maxlength="255" required>
@@ -218,9 +192,9 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option selected disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach ($categories as $valor => $nome): ?>
-                  <option value="<?php echo htmlspecialchars($valor); ?>">
-                    <?php echo htmlspecialchars($nome); ?>
+                <?php foreach ($categories as $cat_id => $nome): ?>
+                  <option value="<?php echo htmlspecialchars($cat_id); ?>">
+                    <?php echo htmlspecialchars(str_replace('_', ' ', $nome)); ?>
                   </option>
                 <?php endforeach; ?>
               </select>
@@ -241,37 +215,11 @@ $_SESSION['email_recover_password'] = $_SESSION['user_email'] ?? null;
     </div>
   </div>
 
-  <?php include '../includes/spinner.php'?>
+  <?php include '../includes/spinner.php' ?>
   <script src="../assets/js/spinner.js"></script>
   <?php include '../includes/bootstrap_script.php' ?>
   <script src="../assets/js/toast.js"></script>
   <script>
-    function open_delete_modal(email) {
-      document.getElementById("email_feedback").classList.add("d-none");
-      document.getElementById("delete_confirm_email").value = "";
-      document.getElementById("delete_email").value = email;
-      const modal = new bootstrap.Modal(document.getElementById("delete_account_modal"));
-      modal.show();
-    }
-
-    document.getElementById("delete_confirm_email").addEventListener("input", function() {
-      const typedEmail = this.value;
-      const userEmail = document.getElementById("delete_email").value;
-      const feedback = document.getElementById("email_feedback");
-      const deleteBtn = document.getElementById("delete_account_btn");
-
-      if (typedEmail === "") {
-        feedback.classList.add("d-none");
-        deleteBtn.disabled = true;
-      } else if (typedEmail === userEmail) {
-        feedback.classList.add("d-none");
-        deleteBtn.disabled = false;
-      } else {
-        feedback.classList.remove("d-none");
-        deleteBtn.disabled = true;
-      }
-    });
-
     document.addEventListener("DOMContentLoaded", function() {
       const certModal = document.getElementById('add_certificate_modal');
       const form = document.querySelector("#add_certificate_modal form");

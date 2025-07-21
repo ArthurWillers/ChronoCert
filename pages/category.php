@@ -8,50 +8,48 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
   redirect_with_toast('../index.php', "Você não está logado. Faça login para deletar a conta.");
 }
 
-$categories = [
-  'Bolsa_Projetos_de_Ensino_e_Extensoes' => 'Bolsa, Projetos de Ensino e Extensões',
-  'Ouvinte_em_Eventos_relacionados_ao_Curso' => 'Ouvinte em Eventos relacionados ao Curso',
-  'Organizador_em_Eventos_relacionados_ao_Curso' => 'Organizador em Eventos relacionados ao Curso',
-  'Voluntario_em_Areas_do_Curso' => 'Voluntário em Áreas do Curso',
-  'Estagio_Nao_Obrigatorio' => 'Estágio Não Obrigatório',
-  'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 'Publicação, Apresentação e Premiação de Trabalhos',
-  'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 'Visitas e Viagens de Estudo relacionadas ao Curso',
-  'Curso_de_Formacao_na_Area_Especifica' => 'Curso de Formação na Área Específica',
-  'Ouvinte_em_apresentacao_de_trabalhos' => 'Ouvinte em Apresentação de Trabalhos',
-  'Curso_de_Linguas' => 'Curso de Línguas',
-  'Monitor_em_Areas_do_Curso' => 'Monitor em Áreas do Curso',
-  'Participacoes_Artisticas_e_Institucionais' => 'Participações Artísticas e Institucionais',
-  'Atividades_Colegiais_Representativas' => 'Atividades Colegiais Representativas',
-];
+// Redirect coordinators to their specific dashboard
+if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'coordenador') {
+  header('Location: coordinator_dashboard.php');
+  exit();
+}
 
-$category_limit = [
-  'Bolsa_Projetos_de_Ensino_e_Extensoes' => 40,
-  'Ouvinte_em_Eventos_relacionados_ao_Curso' => 60,
-  'Organizador_em_Eventos_relacionados_ao_Curso' => 20,
-  'Voluntario_em_Areas_do_Curso' => 20,
-  'Estagio_Nao_Obrigatorio' => 40,
-  'Publicacao_Apresentacao_e_Premiacao_de_Trabalhos' => 20,
-  'Visitas_e_Viagens_de_Estudo_relacionadas_ao_Curso' => 30,
-  'Curso_de_Formacao_na_Area_Especifica' => 40,
-  'Ouvinte_em_apresentacao_de_trabalhos' => 10,
-  'Curso_de_Linguas' => 30,
-  'Monitor_em_Areas_do_Curso' => 30,
-  'Participacoes_Artisticas_e_Institucionais' => 20,
-  'Atividades_Colegiais_Representativas' => 20
-];
-
-$category = $_GET['category'] ?? null;
-if ($category === null) {
+$category_id = $_GET['category'] ?? null;
+if ($category_id === null) {
   redirect_with_toast('./dashboard.php', "Categoria não especificada.");
 }
 
-if (!array_key_exists($category, $categories)) {
+$db = new db_connection();
+$conn = $db->get_connection();
+
+// Get category info from database
+$sql_category = "SELECT * FROM categoria WHERE id = ?";
+$category_result = $conn->execute_query($sql_category, [$category_id]);
+
+if (!$category_result || $category_result->num_rows === 0) {
+  if ($category_result) $category_result->free();
+  $db->close_connection();
   redirect_with_toast('./dashboard.php', "Categoria inválida.");
 }
-$category_name = $categories[$category];
-$category_limit = $category_limit[$category];
+
+$category_data = $category_result->fetch_assoc();
+$category_result->free();
+
+$category_name = $category_data['nome'];
+$category_limit = (float)$category_data['carga_maxima'];
 
 $user_email = $_SESSION['user_email'];
+
+$sql_user_course = "SELECT fk_curso_id FROM usuario WHERE email = ?";
+$user_course_result = $conn->execute_query($sql_user_course, [$user_email]);
+$user_course_id = null;
+
+if ($user_course_result && $user_course_result->num_rows > 0) {
+  $user_data = $user_course_result->fetch_assoc();
+  $user_course_id = $user_data['fk_curso_id'];
+}
+
+if ($user_course_result) $user_course_result->free();
 ?>
 
 <!doctype html>
@@ -109,19 +107,18 @@ $user_email = $_SESSION['user_email'];
 
     <?php
 
-    $db = new db_connection();
-    $conn = $db->get_connection();
-
     $sql = "SELECT SUM(carga_horaria) AS total 
             FROM certificado 
             WHERE fk_usuario_email = ? 
-            AND FIND_IN_SET(?, categoria) > 0";
+            AND fk_categoria_id = ?
+            AND status = 'válido'";
 
     try {
-      $result = $conn->execute_query($sql, [$user_email, $category]);
+      $result = $conn->execute_query($sql, [$user_email, $category_id]);
       $row = $result->fetch_assoc();
       $total_hours = (float)($row['total'] ?? 0);
 
+      if ($result) $result->free();
 
       if ($total_hours > $category_limit) {
         $total_hours = $category_limit;
@@ -151,7 +148,7 @@ $user_email = $_SESSION['user_email'];
         <div class='col-12'>
           <div class='card text-center shadow-lg'>
             <div class='card-body p-4'>
-              <h5 class='card-title fw-bold mb-3'>" . htmlspecialchars($category_name) . "</h5>
+              <h5 class='card-title fw-bold mb-3'>" . htmlspecialchars(str_replace('_', ' ', $category_name)) . "</h5>
               <div class='position-relative mb-2'>
                 <div class='fw-bold mb-2 fs-5'>{$total_hours}/{$category_limit}h</div>
                 <div class='progress' style='height: 25px;'>
@@ -172,24 +169,22 @@ $user_email = $_SESSION['user_email'];
 
     <div class="row">
       <?php
-      $db = new db_connection();
-      $conn = $db->get_connection();
 
-
-      $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria 
+      $sql = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria, status 
               FROM certificado 
               WHERE fk_usuario_email = ? 
-              AND FIND_IN_SET(?, categoria) > 0
-              ORDER BY nome_pessoal";
+              AND fk_categoria_id = ?";
 
       try {
-        $result = $conn->execute_query($sql, [$user_email, $category]);
+        $result = $conn->execute_query($sql, [$user_email, $category_id]);
 
         if ($result->num_rows > 0) {
           while ($cert = $result->fetch_assoc()) {
             $file_name = htmlspecialchars($cert['nome_do_arquivo']);
             $display_name = htmlspecialchars($cert['nome_pessoal']);
             $hours = number_format($cert['carga_horaria'], 1);
+            $status_color = $cert['status'] === 'válido' ? 'success' : ($cert['status'] === 'incerto' ? 'warning' : 'danger');
+            $status_text = ucfirst(str_replace('_', ' ', $cert['status']));
 
             echo "
             <div class='col-md-6 col-lg-4 col-xl-3 mb-4'>
@@ -197,6 +192,7 @@ $user_email = $_SESSION['user_email'];
                 <div class='card-body text-center'>
                   <h5 class='card-title text-truncate' title='$display_name'>$display_name</h5>
                   <p class='card-text mb-2'>Carga horária: $hours h</p>
+                  <p class='card-text mb-2'><span class='badge bg-$status_color'>$status_text</span></p>
                   <div class='row g-2'>
                     <div class='col-6'>
                       <a href='../actions/download_certificate.php?filename=$file_name' class='btn btn-sm btn-primary w-100'>
@@ -204,10 +200,8 @@ $user_email = $_SESSION['user_email'];
                       </a>
                     </div>
                     <div class='col-6'>
-                      <button class='btn btn-sm btn-danger w-100' data-bs-toggle='modal' 
-                              data-bs-target='#deleteModal' 
-                              data-file='$file_name' 
-                              data-name='$display_name'>
+                      <button class='btn btn-sm btn-danger w-100' 
+                              onclick='showDeleteCertificateModal(\"$file_name\", \"$display_name\")'>
                         <i class='bi bi-trash'></i> Excluir
                       </button>
                     </div>
@@ -227,22 +221,62 @@ $user_email = $_SESSION['user_email'];
   </div>
 
   <!-- Delete Confirmation Modal -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+  <div class="modal fade" id="delete_certificate_modal" tabindex="-1" aria-labelledby="delete_certificate_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="deleteModalLabel">Confirmar exclusão</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="delete_certificate_modal_label">
+            <i class="bi bi-exclamation-triangle me-2"></i>Excluir Certificado
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-          Tem certeza que deseja excluir o certificado <span id="cert-name"></span>?
+        <div class="modal-body p-4">
+          <div class="alert alert-danger d-flex align-items-start" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 mt-1"></i>
+            <div>
+              <h5 class="alert-heading mb-2">⚠️ Atenção! Esta ação é irreversível.</h5>
+              <p class="mb-0">
+                Ao excluir este certificado, ele será <strong>permanentemente removido</strong> do sistema e não poderá ser recuperado.
+              </p>
+            </div>
+          </div>
+
+          <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+              <h6 class="mb-0"><i class="bi bi-trash me-2"></i>O que será removido:</h6>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-2">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  <strong>Certificado:</strong> <span id="certificate-name-display"></span>
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  <strong>Arquivo PDF</strong> do sistema
+                </li>
+                <li class="mb-0">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  <strong>Registro</strong> no banco de dados
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <p class="fw-semibold">Tem certeza de que deseja excluir este certificado permanentemente?</p>
+          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <form action="../actions/delete_certificate.php" method="POST">
-            <input type="hidden" name="file_name" id="file-to-delete">
-            <input type="hidden" name="redirect" value="category.php?category=<?php echo urlencode($category); ?>">
-            <button type="submit" class="btn btn-danger">Excluir</button>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancelar
+          </button>
+          <form action="../actions/delete_certificate.php" method="POST" class="d-inline spinner-trigger">
+            <input type="hidden" name="file_name" id="certificate-file-input">
+            <input type="hidden" name="redirect" value="category.php?category=<?php echo urlencode($category_id); ?>">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-trash me-1"></i>Excluir Certificado
+            </button>
           </form>
         </div>
       </div>
@@ -257,7 +291,7 @@ $user_email = $_SESSION['user_email'];
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data">
+          <form action="../actions/add_certificate.php" method="POST" enctype="multipart/form-data" class="spinner-trigger">
             <div class="mb-3">
               <label class="form-label">Nome</label>
               <input type="text" class="form-control" name="nome_pessoal" placeholder="Digite o nome que consta no certificado" maxlength="255" required>
@@ -272,12 +306,20 @@ $user_email = $_SESSION['user_email'];
               <label class="form-label">Categoria</label>
               <select name="categoria" class="form-select" required>
                 <option disabled value="">Selecione a categoria do certificado</option>
-                <?php foreach ($categories as $valor => $nome): ?>
-                  <option value="<?php echo htmlspecialchars($valor); ?>"
-                    <?php echo ($valor === $category) ? 'selected' : ''; ?>>
-                    <?php echo htmlspecialchars($nome); ?>
-                  </option>
-                <?php endforeach; ?>
+                <?php
+                $sql_all_categories = "SELECT * FROM categoria WHERE fk_curso_id = ? ORDER BY nome";
+                $all_categories_result = $conn->execute_query($sql_all_categories, [$user_course_id]);
+
+                if ($all_categories_result && $all_categories_result->num_rows > 0) {
+                  while ($cat = $all_categories_result->fetch_assoc()) {
+                    $selected = ($cat['id'] == $category_id) ? 'selected' : '';
+                    echo "<option value='" . htmlspecialchars($cat['id']) . "' $selected>";
+                    echo htmlspecialchars(str_replace('_', ' ', $cat['nome']));
+                    echo "</option>";
+                  }
+                  $all_categories_result->free();
+                }
+                ?>
               </select>
             </div>
 
@@ -295,6 +337,11 @@ $user_email = $_SESSION['user_email'];
       </div>
     </div>
   </div>
+
+  <?php
+  // Close database connection
+  $db->close_connection();
+  ?>
 
   <?php include '../includes/spinner.php' ?>
   <script src="../assets/js/spinner.js"></script>
@@ -362,20 +409,16 @@ $user_email = $_SESSION['user_email'];
       validateForm();
     });
 
-    const deleteModal = document.getElementById('deleteModal');
-    if (deleteModal) {
-      deleteModal.addEventListener('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
+    const deleteModal = document.getElementById('delete_certificate_modal');
 
-        const fileName = button.getAttribute('data-file');
-        const certName = button.getAttribute('data-name');
+    function showDeleteCertificateModal(fileName, displayName) {
+      // Set the certificate information in the modal
+      document.getElementById('certificate-name-display').textContent = displayName;
+      document.getElementById('certificate-file-input').value = fileName;
 
-        const modalCertName = deleteModal.querySelector('#cert-name');
-        const fileInput = deleteModal.querySelector('#file-to-delete');
-
-        if (modalCertName) modalCertName.textContent = certName;
-        if (fileInput) fileInput.value = fileName;
-      });
+      // Show the modal
+      const modal = new bootstrap.Modal(deleteModal);
+      modal.show();
     }
   </script>
 </body>
