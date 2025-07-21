@@ -15,7 +15,7 @@ if (!isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 'coordenador') 
 $student_email = $_GET['email'] ?? '';
 
 if (empty($student_email)) {
-    redirect_with_toast('../pages/coordinator_dashboard.php', 'Email do aluno não fornecido');
+  redirect_with_toast('../pages/coordinator_dashboard.php', 'Email do aluno não fornecido');
 }
 
 $db = new db_connection();
@@ -26,9 +26,9 @@ $sql_student = "SELECT * FROM usuario WHERE email = ? AND tipo_de_conta = 'aluno
 $student_result = $conn->execute_query($sql_student, [$student_email]);
 
 if (!$student_result || $student_result->num_rows === 0) {
-    if ($student_result) $student_result->free();
-    $db->close_connection();
-    redirect_with_toast('../pages/coordinator_dashboard.php', 'Aluno não encontrado');
+  if ($student_result) $student_result->free();
+  $db->close_connection();
+  redirect_with_toast('../pages/coordinator_dashboard.php', 'Aluno não encontrado');
 }
 
 $student = $student_result->fetch_assoc();
@@ -39,7 +39,11 @@ $sql_certificates = "SELECT nome_do_arquivo, nome_pessoal, carga_horaria, status
 
 $certificates_result = $conn->execute_query($sql_certificates, [$student_email]);
 
-$sql_hours_by_category = "SELECT fk_categoria_id, SUM(carga_horaria) as total_horas FROM certificado WHERE fk_usuario_email = ?";
+$sql_hours_by_category = "SELECT c.fk_categoria_id, cat.nome as categoria_nome, SUM(c.carga_horaria) as total_horas 
+                          FROM certificado c 
+                          INNER JOIN categoria cat ON c.fk_categoria_id = cat.id 
+                          WHERE c.fk_usuario_email = ? 
+                          GROUP BY c.fk_categoria_id, cat.nome";
 $hours_by_category_result = $conn->execute_query($sql_hours_by_category, [$student_email]);
 
 // Get total hours
@@ -47,9 +51,9 @@ $sql_total = "SELECT SUM(carga_horaria) as total_horas FROM certificado WHERE fk
 $total_result = $conn->execute_query($sql_total, [$student_email]);
 $total_hours = 0;
 if ($total_result && $total_result->num_rows > 0) {
-    $total_row = $total_result->fetch_assoc();
-    $total_hours = $total_row['total_horas'] ?? 0;
-    $total_result->free();
+  $total_row = $total_result->fetch_assoc();
+  $total_hours = $total_row['total_horas'] ?? 0;
+  $total_result->free();
 }
 ?>
 
@@ -74,102 +78,205 @@ if ($total_result && $total_result->num_rows > 0) {
         <img src="../assets/img/ChronoCert_logo_white.png" alt="Logo" height="35" class="d-inline-block">
         <span class="ms-2 align-middle fw-bold">ChronoCert - Detalhes do Aluno</span>
       </a>
-      <a class="btn btn-outline-light" href="coordinator_dashboard.php">Voltar</a>
+      <div class="ms-auto">
+        <a class="btn btn-outline-light" href="coordinator_dashboard.php">
+          <i class="bi bi-arrow-left me-1"></i>Voltar ao Dashboard
+        </a>
+      </div>
     </div>
   </nav>
 
-  <div class="container mt-4">
-    <div class="row">
+  <div class="container-fluid mt-4 px-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
       <div class="col-12">
-        <div class="card mb-4">
-          <div class="card-header">
-            <h3>Informações do Aluno</h3>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h2 class="text-dark fw-bold mb-0">
+            <i class="bi bi-person-circle text-primary me-2"></i>
+            Detalhes do Aluno: <?= htmlspecialchars($student['nome_de_usuario']) ?>
+          </h2>
+          <span class="badge bg-primary fs-5 px-3 py-2">
+            <i class="bi bi-clock me-1"></i>
+            <?= number_format($total_hours, 1) ?> horas totais
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <!-- Student Info Card -->
+      <div class="col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-info-circle me-2"></i>Informações do Aluno
+            </h5>
           </div>
           <div class="card-body">
-            <div class="row">
-              <div class="col-md-6">
-                <p><strong>Nome:</strong> <?= htmlspecialchars($student['nome_de_usuario']) ?></p>
-                <p><strong>Email:</strong> <?= htmlspecialchars($student['email']) ?></p>
+            <div class="text-center mb-4">
+              <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
+                <i class="bi bi-person fs-1 text-white"></i>
               </div>
-              <div class="col-md-6">
-                <p><strong>Total de Horas:</strong> <span class="badge bg-primary fs-6"><?= number_format($total_hours, 1) ?> horas</span></p>
-                <p><strong>Tipo de Conta:</strong> <?= ucfirst($student['tipo_de_conta']) ?></p>
+              <h4 class="text-primary fw-bold"><?= htmlspecialchars($student['nome_de_usuario']) ?></h4>
+            </div>
+
+            <div class="list-group list-group-flush">
+              <div class="list-group-item d-flex align-items-center px-0">
+                <i class="bi bi-envelope text-primary me-3"></i>
+                <div>
+                  <strong>Email:</strong><br>
+                  <span class="text-muted"><?= htmlspecialchars($student['email']) ?></span>
+                </div>
+              </div>
+              <div class="list-group-item d-flex align-items-center px-0">
+                <i class="bi bi-clock text-success me-3"></i>
+                <div>
+                  <strong>Total de Horas:</strong><br>
+                  <span class="badge bg-success fs-6"><?= number_format($total_hours, 1) ?> horas</span>
+                </div>
+              </div>
+              <div class="list-group-item d-flex align-items-center px-0">
+                <i class="bi bi-person-badge text-info me-3"></i>
+                <div>
+                  <strong>Tipo de Conta:</strong><br>
+                  <span class="badge bg-info"><?= ucfirst($student['tipo_de_conta']) ?></span>
+                </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
 
+      <!-- Hours by Category and Certificates -->
+      <div class="col-lg-8">
         <?php if ($hours_by_category_result && $hours_by_category_result->num_rows > 0): ?>
-        <div class="card mb-4">
-          <div class="card-header">
-            <h4>Horas por Categoria</h4>
-          </div>
-          <div class="card-body">
-            <div class="table-responsive">
-              <table class="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Categoria</th>
-                    <th>Total de Horas</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <?php while ($category_hours = $hours_by_category_result->fetch_assoc()): ?>
-                    <tr>
-                      <td><?= htmlspecialchars(str_replace('_', ' ', $category_hours['categoria_nome'])) ?></td>
-                      <td><?= number_format($category_hours['total_horas'], 1) ?> horas</td>
-                    </tr>
-                  <?php endwhile; ?>
-                </tbody>
-              </table>
+          <!-- Hours by Category Card -->
+          <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+              <h5 class="mb-0">
+                <i class="bi bi-pie-chart me-2"></i>Horas por Categoria
+              </h5>
             </div>
-          </div>
-        </div>
-        <?php endif; ?>
-
-        <div class="card">
-          <div class="card-header d-flex justify-content-between align-items-center">
-            <h4>Certificados</h4>
-            <span class="badge bg-secondary"><?= $certificates_result ? $certificates_result->num_rows : 0 ?> certificados</span>
-          </div>
-          <div class="card-body">
-            <?php if ($certificates_result && $certificates_result->num_rows > 0): ?>
+            <div class="card-body p-0">
               <div class="table-responsive">
-                <table class="table table-striped table-hover">
-                  <thead class="table-dark">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
                     <tr>
-                      <th>Nome do Arquivo</th>
-                      <th>Nome Pessoal</th>
-                      <th>Categoria</th>
-                      <th>Status</th>
-                      <th>Carga Horária</th>
-                      <th>Ações</th>
+                      <th class="border-0 text-success fw-semibold">
+                        <i class="bi bi-tag me-1"></i>Categoria
+                      </th>
+                      <th class="border-0 text-success fw-semibold text-center">
+                        <i class="bi bi-clock me-1"></i>Total de Horas
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
-                    <?php while ($certificate = $certificates_result->fetch_assoc()): 
+                    <?php while ($category_hours = $hours_by_category_result->fetch_assoc()): ?>
+                      <tr>
+                        <td class="align-middle">
+                          <div class="d-flex align-items-center">
+                            <i class="bi bi-tag-fill text-success me-2"></i>
+                            <span class="fw-semibold"><?= htmlspecialchars(str_replace('_', ' ', $category_hours['categoria_nome'] ?? '')) ?></span>
+                          </div>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="badge bg-success fs-6"><?= number_format($category_hours['total_horas'] ?? 0, 1) ?> horas</span>
+                        </td>
+                      </tr>
+                    <?php endwhile; ?>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        <?php endif; ?>
+
+        <!-- Certificates Card -->
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0 text-dark fw-semibold">
+                <i class="bi bi-award text-primary me-2"></i>
+                Certificados do Aluno
+              </h5>
+              <span class="badge bg-primary fs-6">
+                <?= $certificates_result ? $certificates_result->num_rows : 0 ?> certificados
+              </span>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <?php if ($certificates_result && $certificates_result->num_rows > 0): ?>
+              <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="border-0 text-primary fw-semibold">
+                        <i class="bi bi-person me-1"></i>Nome Pessoal
+                      </th>
+                      <th class="border-0 text-primary fw-semibold">
+                        <i class="bi bi-tag me-1"></i>Categoria
+                      </th>
+                      <th class="border-0 text-primary fw-semibold text-center">
+                        <i class="bi bi-check-circle me-1"></i>Status
+                      </th>
+                      <th class="border-0 text-primary fw-semibold text-center">
+                        <i class="bi bi-clock me-1"></i>Carga Horária
+                      </th>
+                      <th class="border-0 text-primary fw-semibold text-center">
+                        <i class="bi bi-gear me-1"></i>Ações
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <?php while ($certificate = $certificates_result->fetch_assoc()):
                       $sql_cat = "SELECT nome FROM categoria WHERE id = ?";
                       $cat_result = $conn->execute_query($sql_cat, [$certificate['fk_categoria_id']]);
-                      $categoria_nome = $cat_result->fetch_assoc()['nome'] ?? '';
-                      $cat_result->free();
-                      
+                      $categoria_nome = $cat_result && $cat_result->num_rows > 0 ? $cat_result->fetch_assoc()['nome'] : '';
+                      if ($cat_result) $cat_result->free();
+
                       $status_color = $certificate['status'] === 'válido' ? 'success' : ($certificate['status'] === 'incerto' ? 'warning' : 'danger');
-                      $status_text = ucfirst(str_replace('_', ' ', $certificate['status']));
+                      $status_text = ucfirst(str_replace('_', ' ', $certificate['status'] ?? ''));
                     ?>
                       <tr>
-                        <td><?= htmlspecialchars($certificate['nome_do_arquivo']) ?></td>
-                        <td><?= htmlspecialchars($certificate['nome_pessoal']) ?></td>
-                        <td><span class="badge bg-info"><?= htmlspecialchars(str_replace('_', ' ', $categoria_nome)) ?></span></td>
-                        <td><span class="badge bg-<?= $status_color ?>"><?= $status_text ?></span></td>
-                        <td><?= number_format($certificate['carga_horaria'], 1) ?> horas</td>
-                        <td>
-                          <a href="../actions/download_certificate.php?filename=<?= urlencode($certificate['nome_do_arquivo']) ?>" class="btn btn-sm btn-primary">
-                            <i class="bi bi-download"></i>
-                          </a>
-                          <div class="btn-group btn-group-sm">
-                            <button class="btn btn-success" onclick="updateStatus('<?= $certificate['nome_do_arquivo'] ?>', 'válido')" title="Válido">V</button>
-                            <button class="btn btn-warning" onclick="updateStatus('<?= $certificate['nome_do_arquivo'] ?>', 'incerto')" title="Incerto">I</button>
-                            <button class="btn btn-danger" onclick="deleteCertificate('<?= $certificate['nome_do_arquivo'] ?>')" title="Remover">R</button>
+                        <td class="align-middle">
+                          <i class="bi bi-person-circle text-primary me-1"></i>
+                          <?= htmlspecialchars($certificate['nome_pessoal']) ?>
+                        </td>
+                        <td class="align-middle">
+                          <span class="badge bg-info fs-6">
+                            <i class="bi bi-tag me-1"></i>
+                            <?= htmlspecialchars(str_replace('_', ' ', $categoria_nome)) ?>
+                          </span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="badge bg-<?= $status_color ?> fs-6"><?= $status_text ?></span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <span class="badge bg-secondary fs-6"><?= number_format($certificate['carga_horaria'], 1) ?>h</span>
+                        </td>
+                        <td class="align-middle text-center">
+                          <div class="btn-group" role="group">
+                            <a href="../actions/download_certificate.php?filename=<?= urlencode($certificate['nome_do_arquivo']) ?>"
+                              class="btn btn-sm btn-outline-primary" title="Download">
+                              <i class="bi bi-download"></i>
+                            </a>
+                            <div class="btn-group btn-group-sm" role="group">
+                              <button class="btn btn-outline-success"
+                                onclick="updateStatus('<?= $certificate['nome_do_arquivo'] ?>', 'válido')"
+                                title="Marcar como Válido">
+                                <i class="bi bi-check-circle"></i>
+                              </button>
+                              <button class="btn btn-outline-warning"
+                                onclick="updateStatus('<?= $certificate['nome_do_arquivo'] ?>', 'incerto')"
+                                title="Marcar como Incerto">
+                                <i class="bi bi-question-circle"></i>
+                              </button>
+                              <button class="btn btn-outline-danger"
+                                onclick="deleteCertificate('<?= $certificate['nome_do_arquivo'] ?>')"
+                                title="Remover Certificado">
+                                <i class="bi bi-trash"></i>
+                              </button>
+                            </div>
                           </div>
                         </td>
                       </tr>
@@ -178,9 +285,12 @@ if ($total_result && $total_result->num_rows > 0) {
                 </table>
               </div>
             <?php else: ?>
-              <div class="text-center text-muted">
-                <i class="bi bi-inbox fs-1"></i>
-                <p class="mt-2">Este aluno ainda não possui certificados cadastrados.</p>
+              <div class="text-center py-5">
+                <div class="text-muted">
+                  <i class="bi bi-inbox display-4 d-block mb-3 opacity-50"></i>
+                  <h5>Nenhum certificado cadastrado</h5>
+                  <p class="mb-0">Este aluno ainda não possui certificados cadastrados no sistema.</p>
+                </div>
               </div>
             <?php endif; ?>
           </div>
@@ -197,33 +307,38 @@ if ($total_result && $total_result->num_rows > 0) {
   <script>
     function updateStatus(filename, status) {
       fetch('../actions/update_certificate_status.php', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'filename=' + encodeURIComponent(filename) + '&status=' + status
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          location.reload();
-        } else {
-          alert('Erro ao atualizar status');
-        }
-      });
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          body: 'filename=' + encodeURIComponent(filename) + '&status=' + status
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            location.reload();
+          } else {
+            alert('Erro ao atualizar status');
+          }
+        });
     }
 
     function deleteCertificate(filename) {
       if (confirm('Tem certeza que deseja remover este certificado?')) {
         fetch('../actions/delete_certificate.php', {
-          method: 'POST',
-          headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-          body: 'file_name=' + encodeURIComponent(filename)
-        })
-        .then(() => location.reload());
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: 'file_name=' + encodeURIComponent(filename)
+          })
+          .then(() => location.reload());
       }
     }
   </script>
 
 </body>
+
 </html>
 
 <?php
