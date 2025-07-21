@@ -348,15 +348,29 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
               <i class="bi bi-plus-circle text-success me-2"></i>Adicionar Nova Categoria
             </h6>
             <form method="POST" action="../actions/add_category.php" class="row g-3 spinner-trigger">
-              <div class="col-md-8">
-                <input type="text" name="category_name" class="form-control form-control-lg"
+              <div class="col-md-6">
+                <label for="category_name" class="form-label fw-semibold">
+                  <i class="bi bi-tag text-primary me-1"></i>Nome da Categoria
+                </label>
+                <input type="text" name="category_name" id="category_name" class="form-control form-control-lg"
                   placeholder="Digite o nome da nova categoria" required>
                 <div class="form-text">
                   <i class="bi bi-info-circle me-1"></i>
                   Use underscores para separar palavras (ex: atividade_complementar)
                 </div>
               </div>
-              <div class="col-md-4 d-flex align-items-start">
+              <div class="col-md-3">
+                <label for="carga_maxima" class="form-label fw-semibold">
+                  <i class="bi bi-clock text-warning me-1"></i>Carga Horária Máxima
+                </label>
+                <input type="number" name="carga_maxima" id="carga_maxima" class="form-control form-control-lg"
+                  placeholder="Horas" min="1" max="200" value="40" required>
+                <div class="form-text">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Em horas (ex: 40)
+                </div>
+              </div>
+              <div class="col-md-3 d-flex align-items-end">
                 <button type="submit" name="add_category" class="btn btn-success btn-lg w-100">
                   <i class="bi bi-plus-circle me-1"></i>Adicionar
                 </button>
@@ -390,6 +404,9 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                         <th class="border-0 text-primary fw-semibold">
                           <i class="bi bi-tag me-1"></i>Nome da Categoria
                         </th>
+                        <th class="border-0 text-primary fw-semibold text-center" style="width: 140px;">
+                          <i class="bi bi-clock me-1"></i>Carga Máxima
+                        </th>
                         <th class="border-0 text-primary fw-semibold text-center" style="width: 200px;">
                           <i class="bi bi-gear me-1"></i>Ações
                         </th>
@@ -412,6 +429,14 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                             <input type="text" id="category_edit_<?= $category['id'] ?>"
                               value="<?= htmlspecialchars($category['nome']) ?>"
                               class="form-control d-none">
+                          </td>
+                          <td class="align-middle text-center">
+                            <span id="category_hours_<?= $category['id'] ?>" class="badge bg-warning fs-6">
+                              <?= $category['carga_maxima'] ?>h
+                            </span>
+                            <input type="number" id="category_hours_edit_<?= $category['id'] ?>"
+                              value="<?= $category['carga_maxima'] ?>"
+                              class="form-control form-control-sm d-none" min="1" max="200">
                           </td>
                           <td class="align-middle text-center">
                             <button class="btn btn-sm btn-outline-warning rounded-pill me-1" onclick="editCategory(<?= $category['id'] ?>)"
@@ -541,6 +566,8 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
     function editCategory(id) {
       document.getElementById('category_name_' + id).classList.add('d-none');
       document.getElementById('category_edit_' + id).classList.remove('d-none');
+      document.getElementById('category_hours_' + id).classList.add('d-none');
+      document.getElementById('category_hours_edit_' + id).classList.remove('d-none');
 
       const row = document.getElementById('category_name_' + id).closest('tr');
       const buttons = row.querySelectorAll('button');
@@ -553,6 +580,8 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
     function cancelEdit(id) {
       document.getElementById('category_name_' + id).classList.remove('d-none');
       document.getElementById('category_edit_' + id).classList.add('d-none');
+      document.getElementById('category_hours_' + id).classList.remove('d-none');
+      document.getElementById('category_hours_edit_' + id).classList.add('d-none');
 
       const row = document.getElementById('category_name_' + id).closest('tr');
       const buttons = row.querySelectorAll('button');
@@ -564,10 +593,22 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
 
     function saveCategory(id) {
       const newName = document.getElementById('category_edit_' + id).value;
+      const newHours = document.getElementById('category_hours_edit_' + id).value;
+
+      if (!newName.trim()) {
+        alert('O nome da categoria não pode estar vazio');
+        return;
+      }
+
+      if (!newHours || newHours < 1 || newHours > 200) {
+        alert('A carga horária deve estar entre 1 e 200 horas');
+        return;
+      }
 
       const formData = new FormData();
       formData.append('category_id', id);
       formData.append('category_name', newName);
+      formData.append('carga_maxima', newHours);
       formData.append('update_category', 'true');
 
       fetch('../actions/update_category.php', {
@@ -577,7 +618,9 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            document.getElementById('category_name_' + id).textContent = newName.replace(/_/g, ' ');
+            document.getElementById('category_name_' + id).innerHTML =
+              '<i class="bi bi-tag-fill text-primary me-2"></i>' + newName.replace(/_/g, ' ');
+            document.getElementById('category_hours_' + id).textContent = newHours + 'h';
             cancelEdit(id);
             location.reload(); // Reload to show success message
           } else {
