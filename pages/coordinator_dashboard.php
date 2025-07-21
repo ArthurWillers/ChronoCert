@@ -82,7 +82,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="../pages/recover_password/recover_password.php">
+              <li><a class="dropdown-item spinner-trigger" href="../actions/recover_password/send_email.php">
                   <i class="bi bi-key me-2"></i>Alterar Senha
                 </a></li>
               <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#delete_account_modal">
@@ -91,7 +91,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="../actions/logout.php">
+              <li><a class="dropdown-item spinner-trigger" href="../actions/logout.php">
                   <i class="bi bi-box-arrow-right me-2"></i>Sair
                 </a></li>
             </ul>
@@ -214,7 +214,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                         <td class="align-middle text-center">
                           <div class="btn-group" role="group">
                             <a href="student_details.php?email=<?= urlencode($student['email']) ?>"
-                              class="btn btn-sm btn-outline-primary" title="Ver Detalhes">
+                              class="btn btn-sm btn-outline-primary spinner-trigger" title="Ver Detalhes">
                               <i class="bi bi-eye me-1"></i>Detalhes
                             </a>
                             <button class="btn btn-sm btn-outline-danger"
@@ -260,7 +260,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <form method="POST" action="../actions/register_student.php">
+        <form method="POST" action="../actions/register_student.php" class="spinner-trigger">
           <div class="modal-body p-4">
             <div class="row">
               <div class="col-md-6 mb-3">
@@ -343,7 +343,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
             <h6 class="mb-3">
               <i class="bi bi-plus-circle text-success me-2"></i>Adicionar Nova Categoria
             </h6>
-            <form method="POST" action="../actions/add_category.php" class="row g-3">
+            <form method="POST" action="../actions/add_category.php" class="row g-3 spinner-trigger">
               <div class="col-md-8">
                 <input type="text" name="category_name" class="form-control form-control-lg"
                   placeholder="Digite o nome da nova categoria" required>
@@ -509,7 +509,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
             <i class="bi bi-x-circle me-1"></i>Cancelar
           </button>
-          <form method="POST" action="../actions/delete_account.php" class="d-inline">
+          <form method="POST" action="../actions/delete_account.php" class="d-inline spinner-trigger">
             <button type="submit" name="delete_submit" class="btn btn-warning">
               <i class="bi bi-person-x me-1"></i>Deletar Minha Conta
             </button>
@@ -528,6 +528,8 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
   <script>
     function deleteStudent(email) {
       if (confirm('Tem certeza de que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
+        // Ativar spinner manualmente
+        document.getElementById('spinner').style.display = 'flex';
         window.location.href = '../actions/delete_student.php?email=' + encodeURIComponent(email);
       }
     }
