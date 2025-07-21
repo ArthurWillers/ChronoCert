@@ -277,7 +277,7 @@ if ($total_result && $total_result->num_rows > 0) {
                                 <i class="bi bi-question-circle"></i>
                               </button>
                               <button class="btn btn-outline-danger"
-                                onclick="deleteCertificate('<?= $certificate['nome_do_arquivo'] ?>')"
+                                onclick="showDeleteCertificateModal('<?= $certificate['nome_do_arquivo'] ?>', '<?= htmlspecialchars($certificate['nome_pessoal']) ?>')"
                                 title="Remover Certificado">
                                 <i class="bi bi-trash"></i>
                               </button>
@@ -299,6 +299,69 @@ if ($total_result && $total_result->num_rows > 0) {
               </div>
             <?php endif; ?>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Certificate Confirmation Modal -->
+  <div class="modal fade" id="delete_certificate_modal" tabindex="-1" aria-labelledby="delete_certificate_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="delete_certificate_modal_label">
+            <i class="bi bi-exclamation-triangle me-2"></i>Excluir Certificado
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-danger d-flex align-items-start" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 mt-1"></i>
+            <div>
+              <h5 class="alert-heading mb-2">⚠️ Atenção! Esta ação é irreversível.</h5>
+              <p class="mb-0">
+                Ao excluir este certificado, ele será <strong>permanentemente removido</strong> do sistema e não poderá ser recuperado.
+              </p>
+            </div>
+          </div>
+
+          <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+              <h6 class="mb-0"><i class="bi bi-trash me-2"></i>O que será removido:</h6>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-2">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  <strong>Certificado:</strong> <span id="certificate-name-display"></span>
+                </li>
+                <li class="mb-2">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  <strong>Arquivo PDF</strong> do sistema
+                </li>
+                <li class="mb-0">
+                  <i class="bi bi-x-circle text-danger me-2"></i>
+                  <strong>Registro</strong> no banco de dados
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <p class="fw-semibold">Tem certeza de que deseja excluir este certificado permanentemente?</p>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancelar
+          </button>
+          <form action="../actions/delete_certificate.php" method="POST" class="d-inline spinner-trigger">
+            <input type="hidden" name="file_name" id="certificate-file-input">
+            <input type="hidden" name="redirect" value="student_details.php?email=<?php echo urlencode($student_email); ?>">
+            <button type="submit" class="btn btn-danger">
+              <i class="bi bi-trash me-1"></i>Excluir Certificado
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -328,17 +391,14 @@ if ($total_result && $total_result->num_rows > 0) {
         });
     }
 
-    function deleteCertificate(filename) {
-      if (confirm('Tem certeza que deseja remover este certificado?')) {
-        fetch('../actions/delete_certificate.php', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: 'file_name=' + encodeURIComponent(filename)
-          })
-          .then(() => location.reload());
-      }
+    function showDeleteCertificateModal(fileName, displayName) {
+      // Set the certificate information in the modal
+      document.getElementById('certificate-name-display').textContent = displayName;
+      document.getElementById('certificate-file-input').value = fileName;
+
+      // Show the modal
+      const modal = new bootstrap.Modal(document.getElementById('delete_certificate_modal'));
+      modal.show();
     }
   </script>
 

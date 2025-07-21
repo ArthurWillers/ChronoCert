@@ -222,7 +222,7 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
                               <i class="bi bi-eye me-1"></i>Detalhes
                             </a>
                             <button class="btn btn-sm btn-outline-danger"
-                              onclick="deleteStudent('<?= htmlspecialchars($student['email']) ?>')"
+                              onclick="showDeleteStudentModal('<?= htmlspecialchars($student['email']) ?>', '<?= htmlspecialchars($student['nome_de_usuario']) ?>')"
                               title="Excluir Aluno">
                               <i class="bi bi-trash"></i>
                             </button>
@@ -548,6 +548,60 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
     </div>
   </div>
 
+  <!-- Delete Student Modal -->
+  <div class="modal fade" id="delete_student_modal" tabindex="-1" aria-labelledby="delete_student_modal_label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-danger text-white">
+          <h5 class="modal-title" id="delete_student_modal_label">
+            <i class="bi bi-exclamation-triangle me-2"></i>Excluir Aluno
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="alert alert-danger d-flex align-items-start" role="alert">
+            <i class="bi bi-exclamation-triangle-fill fs-3 me-3 mt-1"></i>
+            <div>
+              <h5 class="alert-heading mb-2">⚠️ Atenção! Esta ação é irreversível.</h5>
+              <p class="mb-0">
+                Ao excluir este aluno, <strong>todos os dados relacionados</strong> serão permanentemente removidos do sistema.
+              </p>
+            </div>
+          </div>
+
+          <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+              <h6 class="mb-0"><i class="bi bi-trash me-2"></i>O que será removido:</h6>
+            </div>
+            <div class="card-body">
+              <ul class="list-unstyled mb-0">
+                <li class="mb-2"><i class="bi bi-x-circle text-danger me-2"></i>Conta do aluno: <strong id="student-name-display"></strong></li>
+                <li class="mb-2"><i class="bi bi-x-circle text-danger me-2"></i>Email: <strong id="student-email-display"></strong></li>
+                <li class="mb-2"><i class="bi bi-x-circle text-danger me-2"></i>Todos os certificados do aluno</li>
+                <li class="mb-0"><i class="bi bi-x-circle text-danger me-2"></i>Arquivos físicos dos certificados</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="mt-4 text-center">
+            <p class="fw-semibold">Tem certeza de que deseja excluir este aluno permanentemente?</p>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="bi bi-x-circle me-1"></i>Cancelar
+          </button>
+          <form method="POST" action="../actions/delete_student.php" class="d-inline spinner-trigger">
+            <input type="hidden" name="student_email" id="student-email-input">
+            <button type="submit" name="delete_student_submit" class="btn btn-danger">
+              <i class="bi bi-trash me-1"></i>Excluir Aluno
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <?php include '../includes/spinner.php' ?>
   <script src="../assets/js/spinner.js"></script>
   <?php require_once '../includes/bootstrap_script.php' ?>
@@ -555,12 +609,15 @@ $categories_result = $conn->execute_query($sql_categories, [$coordinator_course_
   <script src="../assets/js/toggle_password_visibility.js"></script>
 
   <script>
-    function deleteStudent(email) {
-      if (confirm('Tem certeza de que deseja excluir este aluno? Esta ação não pode ser desfeita.')) {
-        // Ativar spinner manualmente
-        document.getElementById('spinner').style.display = 'flex';
-        window.location.href = '../actions/delete_student.php?email=' + encodeURIComponent(email);
-      }
+    function showDeleteStudentModal(email, username) {
+      // Preenche os dados do aluno no modal
+      document.getElementById('student-name-display').textContent = username;
+      document.getElementById('student-email-display').textContent = email;
+      document.getElementById('student-email-input').value = email;
+
+      // Abre o modal
+      const modal = new bootstrap.Modal(document.getElementById('delete_student_modal'));
+      modal.show();
     }
 
     function editCategory(id) {
